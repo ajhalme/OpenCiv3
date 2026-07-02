@@ -191,7 +191,7 @@ public partial class LowerRightInfoBox : Civ3TextureRect {
 		if (unit.location.HasCity && unit.owner == unit.location.cityAtTile.owner) {
 			terrainType.Text = unit.location.cityAtTile.name;
 		}
-		if (unit.HasRank()) {
+		if (unit.IsCombatUnit()) {
 			showRank = true;
 			unitRank.Text = unit.experienceLevel.displayName;
 			attackDefenseMovement.SetPosition(new Vector2(0, 46));

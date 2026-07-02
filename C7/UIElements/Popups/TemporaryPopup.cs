@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Threading.Tasks;
 
 public partial class TemporaryPopup : Label {
@@ -12,6 +11,7 @@ public partial class TemporaryPopup : Label {
 
 		AddThemeStyleboxOverride("normal", PopupStyleBox());
 		AddThemeColorOverride("font_color", Colors.White);
+		AddThemeFontSizeOverride("font_size", 12);
 	}
 
 	// A stylebox that works well for temporary popups or tooltips in game.

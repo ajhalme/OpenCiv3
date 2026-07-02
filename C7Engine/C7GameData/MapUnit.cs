@@ -82,7 +82,7 @@ namespace C7GameData {
 			return IsLandUnit() && unitType.defense > 0;
 		}
 
-		public bool HasRank() {
+		public bool IsCombatUnit() {
 			return this.unitType.attack > 0 || this.unitType.defense > 0;
 		}
 
@@ -142,7 +142,7 @@ namespace C7GameData {
 
 		public string Describe() {
 			UnitPrototype type = this.unitType;
-			string exp = this.HasRank() ? $"{this.experienceLevel.displayName}" : "";
+			string exp = this.IsCombatUnit() ? $"{this.experienceLevel.displayName}" : "";
 			string hPDesc = ((type.attack > 0) || (type.defense > 0)) ? $" ({this.hitPointsRemaining}/{this.maxHitPoints})" : "";
 			string displayName = this.IsCaptive() ? $" ({this.nationality.adjective}) {this.name}" : $" {this.name}";
 			string attackDesc = (type.bombard > 0) ? $"{type.attack}({type.bombard})" : type.attack.ToString();
@@ -439,7 +439,7 @@ namespace C7GameData {
 						// TODO: Defender retreat behavior requires some more work. There's an issue for it here:
 						// https://github.com/C7-Game/Prototype/issues/274
 						Tile retreatDestination = defender.location.neighbors[attackerAttackDirection];
-						if ((retreatDestination != Tile.NONE) && defender.CanEnterTile(retreatDestination, TileProbe.MoveNonAggroProbe())) {
+						if ((retreatDestination != Tile.NONE) && defender.CanEnter(retreatDestination)) {
 							await defender.move(attackerAttackDirection, true);
 							result = CombatResult.DefenderRetreated;
 							break;
@@ -775,96 +775,144 @@ namespace C7GameData {
 			}
 		}
 
-		// Generalized check to see whether a given tile is accessible to the unit in a given context.
-		public bool CanEnterTile(Tile tile, TileProbe probe) {
+		public enum Intent {
+			Disabled,         // do nothing, don't move
+			MoveFreely,       // enter tile
+			Fight,            // move and fight an enemy unit, capture city/unit, pillage freely, etc
+			Load,             // load a unit on a friendly transport on this tile
+			Unload,           // unload a unit from a transport on this tile
+			NoticeUnit,       // a non-combat unit tries to move on another owner's unit tile
+			NoticeCity,       // a non-combat unit tries to move on another owner's city tile
+			NoticeAlliance,   // a combat unit tries to move on an ally's city/unit tile
+			WarDeclaration,   // a combat unit tries to move on another owner's city/unit tile (TODO: pillage non-enemy road/colony etc for example)
+		}
+
+		/// <summary>
+		/// Returns a unit's intent trying to move in on a tile.
+		/// </summary>
+		/// <param name="tile"></param>
+		/// <returns></returns>
+		// private Intent ResolveIntent(Tile tile, bool tset = false) {
+		private Intent ResolveIntent(Tile tile) {
+			if (!Tile.IsTileValid(tile))
+				return Intent.Disabled;
+
+			var unitOwner = this.owner;
+
 			// TODO: Perhaps this is not sufficient, but it is for now,
 			// since otherwise we can move air units on land and sea
 			if (this.IsAirUnit())
-				return false;
+				return Intent.Disabled;
 
-			if (this.owner.isHuman && !this.owner.HasExploredTile(tile))
-				return true;
+			if (unitOwner.isHuman && !unitOwner.HasExploredTile(tile))
+				return Intent.MoveFreely;
 
-			// TODO: Add sea/ocean restrictions for water units
-			// Check if the player has the appropriate tech or wonder to move freely.
-			// Civ3 seems to not allow to set a destination on sea/ocean without tech/wonder
-			// (even if you can actually go there using the keyboard keys)
-			// but it will go through it if it's just a shortcut to an allowed tile.
+			var hasOwnCity = HasOwnCity(tile, unitOwner);
 
 			// Keep land units on land and sea units on water
 			if (this.IsWaterUnit() && tile.IsLand()) {
-				if (tile.HasCity && tile.cityAtTile.owner == owner) {
-					return true;
-				}
-				return false;
+				if (hasOwnCity) return Intent.MoveFreely;
+
+				return Intent.Disabled;
 			}
 
-			if (CanBoardTransportOnTile(tile))
-				return true;
+			if (this.CanBoardTransportOnTile(tile))
+				return Intent.Load;
 
-			if (CanUnloadToTile(tile))
-				return true;
+			if (this.CanUnloadToTile(tile))
+				return Intent.Unload;
 
 			if (this.IsLandUnit() && !tile.IsLand())
-				return false;
+				return Intent.Disabled;
 
-			if (!this.HasRank()) {
-				if (HasHostileCity(tile, owner)) {
-					if (probe.RaiseNotice) {
-						new MsgShowTemporaryPopup($"Only combat units can capture cities and improvements.", location).send();
+			var hasOtherOwnersCity = HasOtherOwnersCity(tile, unitOwner);
+			var isHumanOwner = this.owner.isHuman;
+			var isActiveTile = this.owner.tileKnowledge.isActiveTile(tile);
+
+			if (isHumanOwner && !isActiveTile && hasOtherOwnersCity) {
+				return Intent.Disabled;
+			}
+
+			if (isHumanOwner && !isActiveTile) {
+				return Intent.MoveFreely;
+			}
+
+			var hasHostileUnits = HasHostileUnits(tile, unitOwner);
+			var hasOtherOwnersUnits = HasOtherOwnersUnits(tile, unitOwner);
+			var otherUnitsOwner = OtherUnitsOwner(tile);
+			var hasHostileCity = HasHostileCity(tile, unitOwner);
+			var cityOwner = tile.cityAtTile?.owner;
+			var hasBarbCamp = tile.hasBarbarianCamp;
+			var isCombatUnit = this.IsCombatUnit();
+			var distanceToTile = this.location.distanceTo(tile);
+
+			if (isHumanOwner && (hasOtherOwnersCity || hasHostileCity || hasOtherOwnersUnits || hasHostileUnits) && distanceToTile > 1) {
+				return Intent.Disabled;
+			}
+
+			if (!isCombatUnit) {
+				if (hasOtherOwnersUnits || hasHostileUnits) {
+					return Intent.NoticeUnit;
+				}
+				if (hasOtherOwnersCity || hasHostileCity || hasBarbCamp) {
+					return Intent.NoticeCity;
+				}
+			}
+
+			// TODO: add check for when we want to pillage something
+
+			if (isCombatUnit) {
+				if (hasHostileUnits || hasHostileCity) {
+					return Intent.Fight;
+				}
+				if (hasOtherOwnersUnits) {
+					if (distanceToTile == 1) {
+						if (EngineStorage.gameData.AreInLockedPeace(unitOwner, otherUnitsOwner)) {
+							return Intent.NoticeAlliance;
+						}
+						return Intent.WarDeclaration;
 					}
-					return false;
-				}
-				if (HasHostileUnits(tile, owner) || (tile.hasBarbarianCamp && !this.owner.isBarbarians)) {
-					if (probe.RaiseNotice) {
-						new MsgShowTemporaryPopup($"Non-combat units may not attack.", location).send();
-					}
-					return false;
-				}
-			}
 
-			var tileOwner = tile.OwningPlayer();
-
-			if (tile.HasCity && tileOwner != this.owner) {
-				if (EngineStorage.gameData.AreInLockedPeace(tileOwner, this.owner)) {
-					return false;
-				}
-			}
-
-			// If we allow declaring war on this move, then it doesn't matter if
-			// there are units belonging to another player on the tile.
-			// TODO: unbreakable alliances
-			if (probe.AllowWarDeclaration) {
-				return true;
-			}
-
-			// Allow AI to "see" human/other AI units even if they are in an unexplored or inactive tile
-			// from their perspective, but allow humans to set a course if the tile
-			// is unknown or not active, aka, the human player shouldn't know what's on the tile
-			// if the tile is not active, or they haven't  discovered it yet.
-			//
-			// If we don't want to have the AI have this advantage over the human player
-			// we can simply remove the !isHuman() condition. This can also be tied to
-			// AI difficulty level, or be made moddable somehow, etc...
-			if (!this.owner.isHuman || this.owner.tileKnowledge.isActiveTile(tile)) {
-				// Check for units belonging to other civs
-				foreach (MapUnit other in tile.unitsOnTile) {
-					if (other.owner != owner) {
-						if (!other.owner.IsAtPeaceWith(owner))
-							return probe.AllowCombat && unitType.attack > 0;
-						return false;
+					if (isActiveTile) {
+						return Intent.Disabled;
 					}
 				}
+				if (hasOtherOwnersCity) {
+					if (distanceToTile == 1) {
+						if (EngineStorage.gameData.AreInLockedPeace(unitOwner, cityOwner)) {
+							return Intent.NoticeAlliance;
+						}
+						return Intent.WarDeclaration;
+					}
+					return Intent.Disabled;
+				}
 			}
 
-			// Check for cities belonging to other civs.
-			if (tile.cityAtTile != null && tile.cityAtTile.owner != owner) {
-				if (!this.owner.isHuman || this.owner.tileKnowledge.isActiveTile(tile))
-					return probe.AllowCombat;
-				return false;
-			}
+			return Intent.MoveFreely;
+		}
 
-			return true;
+		public bool CanEnter(Tile tile) {
+			return CanEnter(tile, out _);
+		}
+		public bool CanEnter(Tile tile, out Intent intent) {
+			intent = this.ResolveIntent(tile);
+			return intent == Intent.MoveFreely || intent == Intent.Fight || intent == Intent.Load || intent == Intent.Unload;
+		}
+
+		public bool CanEnterPeacefully(Tile tile) {
+			return CanEnterPeacefully(tile, out _);
+		}
+		public bool CanEnterPeacefully(Tile tile, out Intent intent) {
+			intent = this.ResolveIntent(tile);
+			return intent == Intent.MoveFreely || intent == Intent.Load || intent == Intent.Unload;
+		}
+
+		public bool CanEnterForcefully(Tile tile) {
+			return CanEnterForcefully(tile, out _);
+		}
+		public bool CanEnterForcefully(Tile tile, out Intent intent) {
+			intent = this.ResolveIntent(tile);
+			return intent == Intent.MoveFreely || intent == Intent.Fight || intent == Intent.Load || intent == Intent.Unload || intent == Intent.WarDeclaration;
 		}
 
 		private bool CanBoardTransportOnTile(Tile tile) {
@@ -948,9 +996,26 @@ namespace C7GameData {
 			}
 			return false;
 		}
+		private static bool HasOtherOwnersUnits(Tile tile, Player player) {
+			foreach (MapUnit other in tile.unitsOnTile) {
+				if (player != other.owner)
+					return true;
+			}
+			return false;
+		}
+
+		private static Player OtherUnitsOwner(Tile tile) {
+			return tile.unitsOnTile.FirstOrDefault()?.owner;
+		}
 
 		private static bool HasHostileCity(Tile tile, Player player) {
 			return tile.HasCity && AtWar(player, tile.cityAtTile.owner);
+		}
+		private static bool HasOtherOwnersCity(Tile tile, Player player) {
+			return tile.HasCity && tile.cityAtTile.owner != player;
+		}
+		private static bool HasOwnCity(Tile tile, Player player) {
+			return tile.HasCity && tile.cityAtTile.owner == player;
 		}
 
 		/// <summary>
@@ -963,79 +1028,86 @@ namespace C7GameData {
 		/// <exception cref="Exception"></exception>
 		public async Task<bool> move(TileDirection dir, bool wait = false) {
 			(int dx, int dy) = dir.toCoordDiff();
+
 			Tile newLoc = EngineStorage.gameData.map.tileAt(dx + location.XCoordinate, dy + location.YCoordinate);
-			if ((newLoc != Tile.NONE) && CanEnterTile(newLoc, TileProbe.MoveAggroWithNoticeProbe()) && (movementPoints.canMove)) {
-				facingDirection = dir;
-				wake();
 
-				// Trigger combat if the tile we're moving into has an enemy  Or if this unit can't fight, do nothing.
-				MapUnit defender = newLoc.FindTopDefender(this);
-				if (defender != MapUnit.NONE && !owner.IsAtPeaceWith(defender.owner)) {
-					if (unitType.attack > 0) {
-						CombatResult combatResult = await fight(defender);
-						// If we were killed then of course there's nothing more to do. If the combat couldn't happen for whatever
-						// reason, just give up on trying to move.
-						if (combatResult == CombatResult.AttackerKilled) {
-							return false;
-						}
-						if (combatResult == CombatResult.Impossible) {
-							return true;
-						}
+			var canMove = (newLoc != Tile.NONE) && this.CanEnter(newLoc) && (movementPoints.canMove);
+			if (!canMove) return false;
 
-						// If the enemy was defeated, check if there is another enemy on the tile. If so we can't complete the move
-						// but still pay one movement point for the combat.
-						else if (combatResult == CombatResult.DefenderKilled || combatResult == CombatResult.DefenderRetreated) {
-							if (newLoc.FindTopDefender(this) != MapUnit.NONE) {
-								movementPoints.onUnitMove(1);
-								return true;
-							}
+			facingDirection = dir;
+			wake();
 
-							// Similarly if we retreated, pay one MP for the combat but don't move.
-						} else if (combatResult == CombatResult.AttackerRetreated) {
-							movementPoints.onUnitMove(1);
-							return true;
-						}
-					} else {
+			// Trigger combat if the tile we're moving into has an enemy  Or if this unit can't fight, do nothing.
+			MapUnit defender = newLoc.FindTopDefender(this);
+			if (defender != MapUnit.NONE && !owner.IsAtPeaceWith(defender.owner)) {
+				if (unitType.attack <= 0) {
+					return true;
+				}
+
+				CombatResult combatResult = await fight(defender);
+				this.path = TilePath.NONE;
+				// If we were killed then of course there's nothing more to do. If the combat couldn't happen for whatever
+				// reason, just give up on trying to move.
+				if (combatResult == CombatResult.AttackerKilled) {
+					return false;
+				}
+				if (combatResult == CombatResult.Impossible) {
+					return true;
+				}
+
+				// If the enemy was defeated, check if there is another enemy on the tile. If so we can't complete the move
+				// but still pay one movement point for the combat.
+				if (combatResult == CombatResult.DefenderKilled || combatResult == CombatResult.DefenderRetreated) {
+					this.movementPoints.onUnitMove(1);
+					if (newLoc.FindTopDefender(this) != MapUnit.NONE) {
+						this.facingDirection = this.facingDirection.reversed();
 						return true;
 					}
+
+					// Similarly if we retreated, pay one MP for the combat but don't move.
+				} else if (combatResult == CombatResult.AttackerRetreated) {
+					this.movementPoints.onUnitMove(1);
+					this.facingDirection = this.facingDirection.reversed();
+					return true;
 				}
-
-				facingDirection = dir;
-				float movementCost = TilePath.GetMovementCost(this.owner, location, dir, newLoc);
-
-				// Leave old tile
-				if (!location.unitsOnTile.Remove(this))
-					throw new System.Exception("Failed to remove unit from tile it's supposed to be on");
-
-				// Move transported units, too
-				if (CanTransport()) {
-					var transported = location.unitsOnTile
-						.Where(u => u.IsLoadedIn(this)).ToList();
-
-					foreach (var tu in transported) {
-						if (!location.unitsOnTile.Remove(tu))
-							throw new System.Exception("Failed to remove unit from tile during transport move");
-						newLoc.unitsOnTile.Add(tu);
-						tu.location = newLoc;
-					}
-				}
-
-				TryBoardingTransportOnTile(newLoc);
-				TryUnboardingTransportToTile(newLoc);
-
-				// Enter new tile
-				// Make sure the unit is on the new location before claiming we have entered the tile
-				newLoc.unitsOnTile.Add(this);
-				location = newLoc;
-				OnEnterTile(newLoc);
-
-				if (wait)
-					await animateAsync(MapUnit.AnimatedAction.RUN);
-				else
-					animate(MapUnit.AnimatedAction.RUN);
-
-				movementPoints.onUnitMove(movementCost);
 			}
+
+			facingDirection = dir;
+			float movementCost = TilePath.GetMovementCost(this.owner, location, dir, newLoc);
+
+			// Leave old tile
+			if (!location.unitsOnTile.Remove(this))
+				throw new System.Exception("Failed to remove unit from tile it's supposed to be on");
+
+			// Move transported units, too
+			if (CanTransport()) {
+				var transported = location.unitsOnTile
+					.Where(u => u.IsLoadedIn(this)).ToList();
+
+				foreach (var tu in transported) {
+					if (!location.unitsOnTile.Remove(tu))
+						throw new System.Exception("Failed to remove unit from tile during transport move");
+					newLoc.unitsOnTile.Add(tu);
+					tu.location = newLoc;
+				}
+			}
+
+			TryBoardingTransportOnTile(newLoc);
+			TryUnboardingTransportToTile(newLoc);
+
+			// Enter new tile
+			// Make sure the unit is on the new location before claiming we have entered the tile
+			newLoc.unitsOnTile.Add(this);
+			location = newLoc;
+			OnEnterTile(newLoc);
+
+			if (wait)
+				await animateAsync(MapUnit.AnimatedAction.RUN);
+			else
+				animate(MapUnit.AnimatedAction.RUN);
+
+			movementPoints.onUnitMove(movementCost);
+
 			return true;
 		}
 

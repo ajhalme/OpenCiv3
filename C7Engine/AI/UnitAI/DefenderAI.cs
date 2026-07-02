@@ -53,7 +53,7 @@ namespace C7Engine.AI.UnitAI {
 				return C7GameData.UnitAI.Result.Done;
 			} else {
 				log.Debug("Moving defender towards " + data.destination);
-				return this.TryToMoveAlongPath(unit, ref data.pathToDestination, TileProbe.MoveNonAggroProbe());
+				return this.TryToMoveAlongPath(unit, ref data.pathToDestination);
 			}
 		}
 

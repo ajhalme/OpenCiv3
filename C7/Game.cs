@@ -8,6 +8,7 @@ using C7Engine.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static C7GameData.MapUnit;
 
 public class GotoInfo {
 	public Tile destinationTile = null;
@@ -16,6 +17,7 @@ public class GotoInfo {
 	public HashSet<System.Numerics.Vector2> pathCoords;
 	public bool attackingMove = false;
 	public Player requiresWarDeclarationOnPlayer = null;
+	public Intent intent = Intent.Disabled;
 };
 
 public class TileInfo {
@@ -516,7 +518,7 @@ public partial class Game : Node {
 
 	public override void _Input(InputEvent @event) {
 		if (@event is InputEventKey e && e.Pressed && !e.IsAction(C7Action.UnitGoto)) {
-			this.setGotoMode(false);
+			this.SetGotoMode(false);
 		}
 	}
 
@@ -592,8 +594,8 @@ public partial class Game : Node {
 
 	private void OnSingleLeftMouseButtonClick(InputEventMouseButton eventMouseButton) {
 		if (gotoInfo != null) {
-			HandleGotoClick(gotoInfo);
-			setGotoMode(false);
+			this.ResolveMovement(gotoInfo);
+			this.SetGotoMode(false);
 		} else if (bombardInfo != null) {
 			Tile tile = PositionToTile(eventMouseButton.Position);
 			if (bombardInfo.bombardingUnit.canBombardTile(tile)) {
@@ -650,7 +652,7 @@ public partial class Game : Node {
 	}
 
 	private void HandleRightMouseButton(InputEventMouseButton eventMouseButton) {
-		setGotoMode(false);
+		this.SetGotoMode(false);
 
 		Tile tile = PositionToTile(eventMouseButton.Position);
 		if (tile != null) {
@@ -901,7 +903,9 @@ public partial class Game : Node {
 			TileDirection? dir = C7Action.ToTileDirection(currentAction);
 
 			if (dir.HasValue) {
-				new MsgMoveUnit(CurrentlySelectedUnit.id, dir.Value).send();
+				this.gotoInfo = GetGotoInfo(CurrentlySelectedUnit.location.GetTileAtNeighborIndex((int)(dir) + 1));
+				this.ResolveMovement(this.gotoInfo);
+				this.SetGotoMode(false);
 			}
 		}
 
@@ -973,7 +977,7 @@ public partial class Game : Node {
 		// toggles the go to state, but must be detoggled in _*Input methods if
 		// it is not the input being pressed.
 		if (currentAction == C7Action.UnitGoto) {
-			setGotoMode(true);
+			this.SetGotoMode(true);
 		}
 
 		if (currentAction == C7Action.UnitExplore && CurrentlySelectedUnit != MapUnit.NONE) {
@@ -1046,11 +1050,12 @@ public partial class Game : Node {
 		new MsgStartWorkerJob(CurrentlySelectedUnit.id, terraform).send();
 	}
 
-	private void setGotoMode(bool isOn) {
+	private void SetGotoMode(bool isOn) {
 		if (isOn) {
-			gotoInfo = new();
+			this.gotoInfo = new();
 		} else {
-			gotoInfo = null;
+			this.gotoInfo = null;
+			this.lastTile = null;
 		}
 	}
 
@@ -1060,8 +1065,27 @@ public partial class Game : Node {
 			Input.SetCustomMouseCursor(null);
 	}
 
-	private void HandleGotoClick(GotoInfo info) {
-		if (info == null || info.moveCost == -1) {
+	private void ResolveMovement(GotoInfo info) {
+		if (info == null) {
+			return;
+		}
+
+		log.Debug($"Resolve movement intent: {info.intent}");
+
+		if (info.intent == Intent.NoticeUnit) {
+			new MsgShowTemporaryPopup($"Non-combat units may not attack.", info.destinationTile).send();
+			return;
+		}
+		if (info.intent == Intent.NoticeCity) {
+			new MsgShowTemporaryPopup($"Only combat units can capture cities and improvements.", info.destinationTile).send();
+			return;
+		}
+		if (info.intent == Intent.NoticeAlliance) {
+			new MsgShowTemporaryPopup($"No aggression against alliance.", info.destinationTile).send();
+			return;
+		}
+
+		if (info.moveCost == -1) {
 			return;
 		}
 
@@ -1071,9 +1095,10 @@ public partial class Game : Node {
 			// war for them, clear out the player, and call this method again.
 			if (info.requiresWarDeclarationOnPlayer != null) {
 				GotoInfo stashed = info;
-				MaybeDeclareWar(stashed.requiresWarDeclarationOnPlayer, gameData.turn, () => {
+				this.MaybeDeclareWar(stashed.requiresWarDeclarationOnPlayer, gameData.turn, () => {
 					stashed.requiresWarDeclarationOnPlayer = null;
-					HandleGotoClick(stashed);
+					this.ResolveMovement(stashed);
+					this.SetGotoMode(false);
 				});
 			} else {
 				new MsgSetUnitPath(CurrentlySelectedUnit.id, info.path).send();
@@ -1098,11 +1123,21 @@ public partial class Game : Node {
 		// Figure out which tile it was.
 		EngineStorage.ReadGameData((GameData gameData) => {
 			Tile tile = mapView.tileOnScreenAt(gameData.map, mousePos);
-			if (tile == lastTile) {
-				result = gotoInfo;
+			result = GetGotoInfo(tile);
+		});
+
+		return result;
+	}
+
+	private GotoInfo GetGotoInfo(Tile tile) {
+		GotoInfo result = new();
+
+		EngineStorage.ReadGameData((GameData gameData) => {
+			if (tile == this.lastTile && this.gotoInfo != null) {
+				result = this.gotoInfo;
 				return;
 			}
-			lastTile = result.destinationTile = tile;
+			this.lastTile = result.destinationTile = tile;
 
 			// Figure out what unit is in goto mode. If the tile we're hovering over is
 			// different than the tile the unit is on, calculate the path to move there.
@@ -1120,9 +1155,11 @@ public partial class Game : Node {
 				// If we couldn't path onto the tile, but the tile is next to us and
 				// we could enter the tile if combat is allowed (or if we could
 				// declare war with the move) mark the path.
-				if (result.moveCost == -1
-					&& unit.location.distanceTo(tile) == 1
-					&& unit.CanEnterTile(tile, TileProbe.DeclareWarProbe())) {
+				var distanceToTile = unit.location.distanceTo(tile);
+				var canEnterForcefully = unit.CanEnterForcefully(tile, out Intent intent);
+				result.intent = intent;
+
+				if (distanceToTile == 1 && canEnterForcefully) {
 					Queue<Tile> pathQueue = new();
 					pathQueue.Enqueue(tile);
 
@@ -1130,11 +1167,11 @@ public partial class Game : Node {
 					result.moveCost = result.path.PathCost(unit.owner, unit.location, unit.unitType.movement,
 						unit.movementPoints.remaining);
 					result.pathCoords = result.path.GetPathCoords();
-					result.attackingMove = true;
 
 					// If we couldn't enter this tile without a war declaration,
 					// record which civ we need to declare war on.
-					if (!unit.CanEnterTile(tile, TileProbe.MoveAggroProbe())) {
+					if (intent == Intent.WarDeclaration) {
+						result.attackingMove = true;
 						if (tile.cityAtTile != null) {
 							result.requiresWarDeclarationOnPlayer = tile.cityAtTile.owner;
 						} else {

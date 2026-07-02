@@ -107,6 +107,8 @@ public sealed class AStarPathFindingWaterUnitTest : MapBase {
 		var north2 = AddNeighborsAndUpdateMap(north1, MakeCoastTile(), TileDirection.NORTH);
 
 		MapUnit unit = MakeWaterUnit();
+		unit.location = startTile;
+		startTile.unitsOnTile.Add(unit);
 
 		AStarAlgorithm aStarAlgorithm = PathingAlgorithmChooser.GetAlgorithm(unit) as AStarAlgorithm;
 		TilePath tilePath = aStarAlgorithm.PathFrom(startTile, north2, unit);
@@ -150,6 +152,8 @@ public sealed class AStarPathFindingWaterUnitTest : MapBase {
 
 		MapUnit unit = MakeWaterUnit();
 		startTile.cityAtTile = new City(north1, unit.owner, "Canal City", ID.None(""));
+		unit.location = startTile;
+		startTile.unitsOnTile.Add(unit);
 
 		AStarAlgorithm aStarAlgorithm = PathingAlgorithmChooser.GetAlgorithm(unit) as AStarAlgorithm;
 		TilePath tilePath = aStarAlgorithm.PathFrom(startTile, north2, unit);
@@ -254,6 +258,8 @@ public sealed class AStarPathFindingWaterUnitTest : MapBase {
 		var north2 = AddNeighborsAndUpdateMap(north1, MakeCoastTile(), TileDirection.NORTH);
 
 		MapUnit unit = MakeWaterUnit();
+		unit.location = startTile;
+		startTile.unitsOnTile.Add(unit);
 
 		north1.cityAtTile = new City(north1, unit.owner, "Canal City", ID.None(""));
 
@@ -296,6 +302,8 @@ public sealed class AStarPathFindingWaterUnitTest : MapBase {
 		var lake4 = AddNeighborsAndUpdateMap(lake1, MakeLakeTile(), TileDirection.NORTH);
 
 		MapUnit unit = MakeWaterUnit();
+		unit.location = startTile;
+		startTile.unitsOnTile.Add(unit);
 
 		AStarAlgorithm aStarAlgorithm = PathingAlgorithmChooser.GetAlgorithm(unit) as AStarAlgorithm;
 		TilePath tilePath = aStarAlgorithm.PathFrom(startTile, lake4, unit);
@@ -377,6 +385,8 @@ public sealed class AStarPathFindingWaterUnitTest : MapBase {
 
 		MapUnit unit = MakeWaterUnit();
 		unit.owner.isHuman = true;
+		unit.location = startTile;
+		startTile.unitsOnTile.Add(unit);
 
 		// Test 1
 		// First we will try to path to the destination blind as a human
