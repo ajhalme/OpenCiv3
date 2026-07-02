@@ -825,11 +825,11 @@ namespace C7GameData {
 			if (this.IsLandUnit() && !tile.IsLand())
 				return Intent.Disabled;
 
-			var hasOtherOwnersCity = HasOtherOwnersCity(tile, unitOwner);
+			var hasForeignCity = HasForeignCity(tile, unitOwner);
 			var isHumanOwner = this.owner.isHuman;
 			var isActiveTile = this.owner.tileKnowledge.isActiveTile(tile);
 
-			if (isHumanOwner && !isActiveTile && hasOtherOwnersCity) {
+			if (isHumanOwner && !isActiveTile && hasForeignCity) {
 				return Intent.Disabled;
 			}
 
@@ -838,23 +838,23 @@ namespace C7GameData {
 			}
 
 			var hasHostileUnits = HasHostileUnits(tile, unitOwner);
-			var hasOtherOwnersUnits = HasOtherOwnersUnits(tile, unitOwner);
-			var otherUnitsOwner = OtherUnitsOwner(tile);
+			var hasForeignUnits = HasForeignUnits(tile, unitOwner);
+			var foreignOwner = ForeignOwner(tile);
 			var hasHostileCity = HasHostileCity(tile, unitOwner);
 			var cityOwner = tile.cityAtTile?.owner;
 			var hasBarbCamp = tile.hasBarbarianCamp;
 			var isCombatUnit = this.IsCombatUnit();
 			var distanceToTile = this.location.distanceTo(tile);
 
-			if (isHumanOwner && (hasOtherOwnersCity || hasHostileCity || hasOtherOwnersUnits || hasHostileUnits) && distanceToTile > 1) {
+			if (isHumanOwner && (hasForeignCity || hasHostileCity || hasForeignUnits || hasHostileUnits) && distanceToTile > 1) {
 				return Intent.Disabled;
 			}
 
 			if (!isCombatUnit) {
-				if (hasOtherOwnersUnits || hasHostileUnits) {
+				if (hasForeignUnits || hasHostileUnits) {
 					return Intent.NoticeUnit;
 				}
-				if (hasOtherOwnersCity || hasHostileCity || hasBarbCamp) {
+				if (hasForeignCity || hasHostileCity || hasBarbCamp) {
 					return Intent.NoticeCity;
 				}
 			}
@@ -865,9 +865,9 @@ namespace C7GameData {
 				if (hasHostileUnits || hasHostileCity) {
 					return Intent.Fight;
 				}
-				if (hasOtherOwnersUnits) {
+				if (hasForeignUnits) {
 					if (distanceToTile == 1) {
-						if (EngineStorage.gameData.AreInLockedPeace(unitOwner, otherUnitsOwner)) {
+						if (EngineStorage.gameData.AreInLockedPeace(unitOwner, foreignOwner)) {
 							return Intent.NoticeAlliance;
 						}
 						return Intent.WarDeclaration;
@@ -877,7 +877,7 @@ namespace C7GameData {
 						return Intent.Disabled;
 					}
 				}
-				if (hasOtherOwnersCity) {
+				if (hasForeignCity) {
 					if (distanceToTile == 1) {
 						if (EngineStorage.gameData.AreInLockedPeace(unitOwner, cityOwner)) {
 							return Intent.NoticeAlliance;
@@ -891,14 +891,6 @@ namespace C7GameData {
 			return Intent.MoveFreely;
 		}
 
-		public bool CanEnter(Tile tile) {
-			return CanEnter(tile, out _);
-		}
-		public bool CanEnter(Tile tile, out Intent intent) {
-			intent = this.ResolveIntent(tile);
-			return intent == Intent.MoveFreely || intent == Intent.Fight || intent == Intent.Load || intent == Intent.Unload;
-		}
-
 		public bool CanEnterPeacefully(Tile tile) {
 			return CanEnterPeacefully(tile, out _);
 		}
@@ -907,12 +899,22 @@ namespace C7GameData {
 			return intent == Intent.MoveFreely || intent == Intent.Load || intent == Intent.Unload;
 		}
 
+		public bool CanEnter(Tile tile) {
+			return CanEnter(tile, out _);
+		}
+		public bool CanEnter(Tile tile, out Intent intent) {
+			var canEnterPeacefully = CanEnterPeacefully(tile, out var it);
+			intent = it;
+			return canEnterPeacefully || it == Intent.Fight;
+		}
+
 		public bool CanEnterForcefully(Tile tile) {
 			return CanEnterForcefully(tile, out _);
 		}
 		public bool CanEnterForcefully(Tile tile, out Intent intent) {
-			intent = this.ResolveIntent(tile);
-			return intent == Intent.MoveFreely || intent == Intent.Fight || intent == Intent.Load || intent == Intent.Unload || intent == Intent.WarDeclaration;
+			var canEnter = CanEnter(tile, out var it);
+			intent = it;
+			return canEnter || it == Intent.WarDeclaration;
 		}
 
 		private bool CanBoardTransportOnTile(Tile tile) {
@@ -996,7 +998,7 @@ namespace C7GameData {
 			}
 			return false;
 		}
-		private static bool HasOtherOwnersUnits(Tile tile, Player player) {
+		private static bool HasForeignUnits(Tile tile, Player player) {
 			foreach (MapUnit other in tile.unitsOnTile) {
 				if (player != other.owner)
 					return true;
@@ -1004,14 +1006,14 @@ namespace C7GameData {
 			return false;
 		}
 
-		private static Player OtherUnitsOwner(Tile tile) {
+		private static Player ForeignOwner(Tile tile) {
 			return tile.unitsOnTile.FirstOrDefault()?.owner;
 		}
 
 		private static bool HasHostileCity(Tile tile, Player player) {
 			return tile.HasCity && AtWar(player, tile.cityAtTile.owner);
 		}
-		private static bool HasOtherOwnersCity(Tile tile, Player player) {
+		private static bool HasForeignCity(Tile tile, Player player) {
 			return tile.HasCity && tile.cityAtTile.owner != player;
 		}
 		private static bool HasOwnCity(Tile tile, Player player) {
