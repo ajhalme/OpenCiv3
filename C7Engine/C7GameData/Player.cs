@@ -642,11 +642,17 @@ namespace C7GameData {
 					continue;
 				}
 
-				if (g.prerequisiteTech == null || knownTechs.Contains(g.prerequisiteTech)) {
+				if (this.HasTech(g.prerequisiteTech)) {
+
 					result.Add(g);
 				}
 			}
 			return result;
+		}
+
+		public bool HasTech(ID techId) {
+			bool hasTech = techId == null || this.knownTechs.Contains(techId);
+			return hasTech;
 		}
 
 		// See https://forums.civfanatics.com/threads/everything-about-corruption-c3c-edition.76619/
@@ -1017,7 +1023,7 @@ namespace C7GameData {
 		// Returns a list of specialists that this player can use.
 		public List<CitizenType> GetKnownSpecialists(GameData gameData) {
 			return gameData.citizenTypes.FindAll(x => {
-				return !x.IsDefaultCitizen && (x.PrerequisiteTech == null || knownTechs.Contains(x.PrerequisiteTech));
+				return !x.IsDefaultCitizen && this.HasTech(x.PrerequisiteTech);
 			});
 		}
 

@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using C7Engine.Lua;
 using C7GameData.Save;
 using System;
+using System.Linq;
+using C7Engine;
 
 namespace C7GameData {
 	public class TerrainImprovement {
@@ -90,6 +92,10 @@ namespace C7GameData {
 			if (this.upgradesFrom == replacement) return false;  // railroad upgrades from road so road cannot replace railroad
 			if (replacement.upgradesFrom == this) return true;   // railroad upgrades from road so railroad can replace road
 			return this.layer == replacement.layer;              // irrigation can replace mine and vice versa, an outpost a radar tower, etc
+		}
+
+		public static Terraform? ToTerraform(string improvement) {
+			return EngineStorage.gameData?.Terraforms.FirstOrDefault(tf => tf.Improvement.key.ToLower() == improvement.ToLower());
 		}
 	}
 }

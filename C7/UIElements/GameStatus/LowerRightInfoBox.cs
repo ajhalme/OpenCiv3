@@ -188,7 +188,7 @@ public partial class LowerRightInfoBox : Civ3TextureRect {
 		bool showRank = false;
 
 		terrainType.Text = terrain.DisplayName;
-		if (unit.location.HasCity && unit.owner == unit.location.cityAtTile.owner) {
+		if (unit.location.HasCity() && unit.owner == unit.location.cityAtTile.owner) {
 			terrainType.Text = unit.location.cityAtTile.name;
 		}
 		if (unit.IsCombatUnit()) {
@@ -274,7 +274,7 @@ public partial class LowerRightInfoBox : Civ3TextureRect {
 		if (this.GetChildren().Contains(unitTintPlaceholder))
 			this.RemoveChild(unitTintPlaceholder);
 
-		if (unit == MapUnit.NONE || unit == null) {
+		if (!MapUnit.IsMapUnitValid(unit)) {
 			return;
 		}
 

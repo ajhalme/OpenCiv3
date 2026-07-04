@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using C7GameData;
 using Godot;
+using static C7GameData.TileOverlays;
 
 namespace C7.Map {
 	public partial class TileOverlayLayer : LooseLayer {
@@ -34,13 +35,13 @@ namespace C7.Map {
 
 			foreach (TerrainImprovement ti in tile.overlays.GetImprovements().OrderBy(ti => ti.zIndex)) {
 				switch (ti.key) {
-					case "irrigation":
+					case IRRIGATION:
 						drawIrrigaton(looseView, tile, screenTarget);
 						break;
-					case "road":
+					case ROAD:
 						drawRoad(looseView, tile, screenTarget);
 						break;
-					case "railroad":
+					case RAILROAD:
 						drawRailRoad(looseView, tile, screenTarget);
 						break;
 					default:
@@ -55,7 +56,8 @@ namespace C7.Map {
 			// this tile.
 			int irrigationIndex = 0;
 			foreach (KeyValuePair<TileDirection, Tile> dirToTile in tile.neighbors) {
-				if (hasIrrigation(dirToTile.Value)) {
+				var neighbour = dirToTile.Value;
+				if (neighbour.HasIrrigation()) {
 					irrigationIndex |= getIrrigationFlag(dirToTile.Key);
 				}
 			}
@@ -76,7 +78,8 @@ namespace C7.Map {
 		private void drawRoad(LooseView looseView, Tile tile, Rect2 screenTarget) {
 			int roadIndex = 0;
 			foreach (KeyValuePair<TileDirection, Tile> dirToTile in tile.neighbors) {
-				if (hasRoad(dirToTile.Value) || dirToTile.Value.HasCity || hasRailRoad((dirToTile.Value))) {
+				var neighbour = dirToTile.Value;
+				if (neighbour.HasRoad() || neighbour.HasRailroad()) {
 					roadIndex |= getRoadFlag(dirToTile.Key);
 				}
 			}
@@ -87,9 +90,10 @@ namespace C7.Map {
 			int roadIndex = 0;
 			int railroadIndex = 0;
 			foreach (KeyValuePair<TileDirection, Tile> dirToTile in tile.neighbors) {
-				if (hasRailRoad(dirToTile.Value) || dirToTile.Value.HasCity) {
+				var neighbour = dirToTile.Value;
+				if (neighbour.HasRailroad()) {
 					railroadIndex |= getRoadFlag(dirToTile.Key);
-				} else if (hasRoad(dirToTile.Value)) {
+				} else if (dirToTile.Value.HasRoad()) {
 					roadIndex |= getRoadFlag(dirToTile.Key);
 				}
 			}
@@ -153,18 +157,6 @@ namespace C7.Map {
 				TileDirection.NORTH => 0,
 				_ => throw new ArgumentOutOfRangeException("Invalid TileDirection")
 			};
-		}
-
-		private static bool hasRoad(Tile tile) {
-			return tile.overlays.ImprovementAtLayer(TerrainImprovement.Layer.Roads)?.key == "road";
-		}
-
-		private static bool hasRailRoad(Tile tile) {
-			return tile.overlays.ImprovementAtLayer(TerrainImprovement.Layer.Roads)?.key == "railroad";
-		}
-
-		private static bool hasIrrigation(Tile tile) {
-			return tile.overlays.ImprovementAtLayer(TerrainImprovement.Layer.ResourceDevelopment)?.key == "irrigation";
 		}
 	}
 }

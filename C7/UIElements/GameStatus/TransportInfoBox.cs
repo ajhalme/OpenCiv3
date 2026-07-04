@@ -48,7 +48,7 @@ public partial class TransportInfoBox : Civ3TextureRect {
 
 		EngineStorage.ReadGameData((GameData gD) => {
 			var unit = _game.CurrentlySelectedUnit;
-			if (unit == null || unit == MapUnit.NONE || !unit.CanTransport()) {
+			if (!MapUnit.IsMapUnitValid(unit) || !unit.CanTransport()) {
 				Visible = false;
 				Reset();
 				return;
@@ -86,7 +86,7 @@ public partial class TransportInfoBox : Civ3TextureRect {
 	}
 
 	private void UpdateUnitGraphic(ICollection<MapUnit> units) {
-		if (!units.Any(u => u != MapUnit.NONE && u != null)) {
+		if (!units.Any(MapUnit.IsMapUnitValid)) {
 			return;
 		}
 

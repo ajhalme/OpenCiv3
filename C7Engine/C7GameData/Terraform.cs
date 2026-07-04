@@ -73,13 +73,13 @@ public class Terraform {
 	}
 
 	public bool MeetsRequirements(Player player, Tile tile) {
-		bool hasTech = RequiredTech == null || player.knownTechs.Contains(RequiredTech);
+		var hasTech = player.HasTech(RequiredTech);
 
 		bool hasResources = RequiredResources.All(
 			res => EngineStorage.gameData.GetTradeNetwork().HasTradeAccess(tile, player, res)
 		);
 
-		bool canAddImprovement = Improvement == null || tile.overlays.CanAdd(Improvement);
+		bool canAddImprovement = Improvement == null || tile.overlays.CanAdd(tile, Improvement);
 
 		return hasTech && hasResources
 				&& canAddImprovement && ActionValidators.All(func => func(new(player, tile, this)));
@@ -89,9 +89,15 @@ public class Terraform {
 		Effect?.Invoke(new(player, tile, this));
 
 		if (Improvement != null) {
-			if (!tile.overlays.CanAdd(Improvement))
+			if (!tile.overlays.CanAdd(tile, Improvement))
 				throw new InvalidOperationException($"Cannot add {Improvement.key} to the tile {tile}");
 			tile.overlays.Add(Improvement);
+
+			var cityTile = tile.neighbors.FirstOrDefault(n => n.Value.HasCity()).Value;
+			if (Improvement.layer == TerrainImprovement.Layer.Roads && cityTile != null) {
+				if (this.MeetsRequirements(cityTile.cityAtTile.owner, cityTile))
+					cityTile.overlays.Add(Improvement);
+			}
 		}
 	}
 

@@ -216,7 +216,7 @@ namespace C7GameData {
 				// This clears out tile ownership due to Law VII or Law VIII.
 				// Regular tile ownership update will re-assign ownership where needed.
 				foreach (var fringeTile in tile.GetEdgeNeighbors().Where(x => !borderTileIds.Contains(x.Id))) {
-					if (fringeTile.HasCity) // skip encountered cities, just in case
+					if (fringeTile.HasCity()) // skip encountered cities, just in case
 						continue;
 
 					fringeTile.owningCity = null;
@@ -395,7 +395,7 @@ namespace C7GameData {
 			// the city tile is in, so a tile at rank 3, could well mean it's in the 2nd ring.
 			for (int r = aRank - 1; r <= aRank; r++) {
 				if (r <= 0) continue;
-				Tile winner = t.FindInRing(r, tile => tile.HasCity && (tile.cityAtTile == a || tile.cityAtTile == b), false);
+				Tile winner = t.FindInRing(r, tile => tile.HasCity() && (tile.cityAtTile == a || tile.cityAtTile == b), false);
 				if (winner == null) continue;
 				owner = winner.owningCity;
 				return true;

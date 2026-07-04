@@ -59,7 +59,7 @@ public class PlayerColorMiniLayer : MiniMapLayer {
 
 public class CityMiniLayer : MiniMapLayer {
 	public override void DrawTile(Image mapImage, Tile tile, int x, int y) {
-		if (visible && tile.HasCity)
+		if (visible && tile.HasCity())
 			mapImage.SetPixel(x, y, Colors.White);
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using C7Engine;
+using static C7GameData.TileOverlays;
 
 namespace C7GameData.Save;
 
@@ -73,12 +74,12 @@ public class SaveTerraform {
 
 	private static string TerraformKeyToTerrainImprovement(TerraformKey tfKey) {
 		return tfKey switch {
-			TerraformKey.BuildMine => "mine",
-			TerraformKey.Irrigate => "irrigation",
-			TerraformKey.BuildFortress => "fortress",
-			TerraformKey.BuildBarricade => "barricade",
-			TerraformKey.BuildRoad => "road",
-			TerraformKey.BuildRailroad => "railroad",
+			TerraformKey.BuildMine => MINE,
+			TerraformKey.Irrigate => IRRIGATION,
+			TerraformKey.BuildFortress => FORTRESS,
+			TerraformKey.BuildBarricade => BARRICADE,
+			TerraformKey.BuildRoad => ROAD,
+			TerraformKey.BuildRailroad => RAILROAD,
 			_ => null,
 		};
 	}

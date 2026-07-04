@@ -80,6 +80,10 @@ namespace C7GameData {
 
 		public static City NONE = new City(Tile.NONE, null, "Dummy City", ID.None("city"));
 
+		public static bool IsValidCity(City city) {
+			return city != null && city != City.NONE;
+		}
+
 		public City(Tile location, Player owner, string name, ID id) {
 			this.id = id;
 			this.location = location;
@@ -740,7 +744,7 @@ namespace C7GameData {
 				}
 
 				// Skip tiles with cities on them.
-				if (t.HasCity) {
+				if (t.HasCity()) {
 					continue;
 				}
 

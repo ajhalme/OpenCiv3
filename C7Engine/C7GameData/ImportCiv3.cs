@@ -7,6 +7,7 @@ using QueryCiv3;
 using QueryCiv3.Biq;
 using C7GameData.Save;
 using System.Reflection;
+using static C7GameData.TileOverlays;
 
 /*
   This will read a Civ3 sav into C7 native format for immediate use or saving to native JSON save
@@ -165,16 +166,16 @@ namespace C7GameData {
 					tile.features.Add("riverNorthwest");
 				}
 				if (civ3Tile.Road) {
-					tile.overlays.Add("road");
+					tile.overlays.Add(ROAD);
 				}
 				if (civ3Tile.Railroad) {
-					tile.overlays.Add("railroad");
+					tile.overlays.Add(RAILROAD);
 				}
 				if (civ3Tile.Mine) {
-					tile.overlays.Add("mine");
+					tile.overlays.Add(MINE);
 				}
 				if (civ3Tile.Irrigation) {
-					tile.overlays.Add("irrigation");
+					tile.overlays.Add(IRRIGATION);
 				}
 				if (civ3Tile.ResourceID != -1) {
 					tile.resource = save.Resources[civ3Tile.ResourceID].Key;
@@ -274,16 +275,16 @@ namespace C7GameData {
 					tile.features.Add("riverNorthwest");
 				}
 				if (civ3Tile.Road) {
-					tile.overlays.Add("road");
+					tile.overlays.Add(ROAD);
 				}
 				if (civ3Tile.Railroad) {
-					tile.overlays.Add("railroad");
+					tile.overlays.Add(RAILROAD);
 				}
 				if (civ3Tile.Mine) {
-					tile.overlays.Add("mine");
+					tile.overlays.Add(MINE);
 				}
 				if (civ3Tile.Irrigation) {
-					tile.overlays.Add("irrigation");
+					tile.overlays.Add(IRRIGATION);
 				}
 				if (civ3Tile.Resource != -1) {
 					tile.resource = save.Resources[civ3Tile.Resource].Key;
@@ -1870,14 +1871,14 @@ namespace C7GameData {
 			}
 
 			if (terrainType.MiningBonus > 0) {
-				SetBonus("mine", Tile.YieldType.Production, terrainType.MiningBonus);
+				SetBonus(MINE, Tile.YieldType.Production, terrainType.MiningBonus);
 			}
 			if (terrainType.IrrigationBonus > 0) {
-				SetBonus("irrigation", Tile.YieldType.Food, terrainType.IrrigationBonus);
+				SetBonus(IRRIGATION, Tile.YieldType.Food, terrainType.IrrigationBonus);
 			}
 			if (terrainType.RoadBonus > 0) {
-				SetBonus("road", Tile.YieldType.Commerce, terrainType.RoadBonus);
-				SetBonus("railroad", Tile.YieldType.Commerce, terrainType.RoadBonus);
+				SetBonus(ROAD, Tile.YieldType.Commerce, terrainType.RoadBonus);
+				SetBonus(RAILROAD, Tile.YieldType.Commerce, terrainType.RoadBonus);
 			}
 		}
 

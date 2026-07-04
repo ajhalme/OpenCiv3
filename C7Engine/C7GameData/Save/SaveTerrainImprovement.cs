@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using static C7GameData.TileOverlays;
 using Layer = C7GameData.TerrainImprovement.Layer;
 
 namespace C7GameData.Save;
@@ -7,30 +8,30 @@ public class SaveTerrainImprovement {
 	// The following method is used to generate terrain improvement
 	// data when loading a CIV3 SAV or BIQ file
 	public static IEnumerable<SaveTerrainImprovement> Civ3Improvements() {
-		yield return new("irrigation", Layer.ResourceDevelopment, zIndex: 0);
-		yield return new("mine", Layer.ResourceDevelopment, zIndex: 2);
+		yield return new(IRRIGATION, Layer.ResourceDevelopment, zIndex: 0);
+		yield return new(MINE, Layer.ResourceDevelopment, zIndex: 2);
 
-		yield return new("road", Layer.Roads, movementCost: 1.0f / 3, zIndex: 1);
+		yield return new(ROAD, Layer.Roads, movementCost: 1.0f / 3, zIndex: 1);
 		yield return new(
-			"railroad",
+			RAILROAD,
 			Layer.Roads,
-			upgradesFrom: "road",
+			upgradesFrom: ROAD,
 			movementCost: 0,
 			zIndex: 1,
 			tileModifier: "terrain_improvements.railroad.tile_modifier"
 		);
 
 		yield return new(
-			"fortress",
+			FORTRESS,
 			Layer.Holdings,
-			defenseBonus: new("fortress", 0.5),
+			defenseBonus: new(FORTRESS, 0.5),
 			zIndex: 3
 		);
 		yield return new(
-			"barricade",
+			BARRICADE,
 			Layer.Holdings,
-			upgradesFrom: "fortress",
-			defenseBonus: new("barricade", 1),
+			upgradesFrom: FORTRESS,
+			defenseBonus: new(BARRICADE, 1),
 			zIndex: 3
 		);
 
