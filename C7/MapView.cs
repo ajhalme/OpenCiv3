@@ -525,7 +525,7 @@ public partial class LooseView : Node2D {
 			}
 
 			if (stopwatch.ElapsedMilliseconds > 100) {
-				log.Information($"-> End draw: {stopwatch.ElapsedMilliseconds} milliseconds");
+				log.Warning($"-> End draw: {stopwatch.ElapsedMilliseconds} milliseconds");
 			}
 
 			if (!gD.observerMode) {

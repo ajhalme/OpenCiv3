@@ -26,14 +26,8 @@ namespace C7Engine.Pathing {
 					return from.distanceTo(to);
 				},
 				(Tile neighbor, Tile destination) => {
-					// Only allow a potentially attacking move for the last step,
-					// to allow pathing to attack. We don't want to try and path
-					// through opponents on the way to our destination though,
-					// as we can get stuck.
-					var probe = neighbor == destination ? TileProbe.MoveAggroProbe() : TileProbe.MoveNonAggroProbe();
-					return unit.CanEnterTile(neighbor, probe);
-				}
-			);
+					return neighbor == destination ? unit.CanEnterForcefully(neighbor) : unit.CanEnterPeacefully(neighbor);
+				});
 		}
 	}
 }

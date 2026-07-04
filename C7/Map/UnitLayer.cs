@@ -273,7 +273,7 @@ public partial class UnitLayer : LooseLayer {
 		Vector2 animOffset = new Vector2(appearance.offsetX, appearance.offsetY) * MapView.cellSize;
 
 		// If the unit we're about to draw is currently selected, draw the cursor first underneath it
-		if ((unit != MapUnit.NONE) && (unit == looseView.mapView.game.CurrentlySelectedUnit)) {
+		if (unit != MapUnit.NONE && unit == looseView.mapView.game.CurrentlySelectedUnit) {
 			drawCursor(looseView, tileCenter + animOffset);
 		}
 

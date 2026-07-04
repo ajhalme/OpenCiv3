@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using C7GameData;
 using Godot;
+using static C7GameData.MapUnit;
 
 // The layer responsible for drawing the cursor when the player is selecting a
 // move via the "goto" command.
@@ -53,7 +54,7 @@ public partial class GotoLayer : LooseLayer {
 
 		staticCursorRect.Position = position - new Vector2(staticCursor.GetWidth(), staticCursor.GetHeight()) / 2;
 
-		gotoLabel.Theme = attackingMove ? redFontTheme : whiteFontTheme;
+		gotoLabel.Theme = whiteFontTheme;
 		gotoLabel.Text = moves > 0 || !attackingMove ? moves.ToString() : " ";
 		Vector2 labelSize = gotoLabelFont.GetStringSize(gotoLabel.Text);
 		gotoLabel.Position = position - labelSize / 2;
@@ -72,7 +73,7 @@ public partial class GotoLayer : LooseLayer {
 	}
 
 	private GotoInfo lastGotoInfo = null;
-	private bool lastCanEnter = false;
+	private Intent lastintent = Intent.Disabled;
 
 	public override void drawObject(LooseView looseView, GameData gameData, Tile tile, Vector2 tileCenter) {
 		MapUnit unit = looseView.mapView.game.CurrentlySelectedUnit;
@@ -88,16 +89,24 @@ public partial class GotoLayer : LooseLayer {
 			DrawStaticGoToCursor(looseView, tileCenter, 0, true);
 		}
 
-		bool canEnter;
+		Intent intent = lastintent;
 
-		if (gotoInfo == lastGotoInfo)
-			canEnter = lastCanEnter;
-		else {
-			lastCanEnter = canEnter = unit.CanEnterTile(gotoInfo.destinationTile, TileProbe.DeclareWarProbe());
+		if (gotoInfo == lastGotoInfo) {
+			intent = lastintent;
+		} else {
+			unit.CanEnterForcefully(gotoInfo.destinationTile, out var outIntent);
+			lastintent = intent = outIntent;
 			lastGotoInfo = gotoInfo;
 		}
 
-		if (gotoInfo.path == null || !canEnter)
+		if (gotoInfo.path == null) return;
+
+		if (gotoInfo.path.path.Count <= 1
+								   && (intent == Intent.Fight
+									   || intent == Intent.WarDeclaration
+									   || intent == Intent.NoticeAlliance
+									   || intent == Intent.NoticeCity
+									   || intent == Intent.NoticeUnit))
 			return;
 
 		List<Tile> tiles = new List<Tile>();
