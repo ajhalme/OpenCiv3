@@ -100,14 +100,14 @@ namespace C7Engine {
 		}
 
 		private static bool IsInvalidCityLocation(Tile tile) {
-			if (tile == Tile.NONE || tile.HasCity)
+			if (tile == Tile.NONE || tile.HasCity())
 				return true;
 			foreach (Tile neighbor in tile.neighbors.Values) {
-				if (neighbor.HasCity) {
+				if (neighbor.HasCity()) {
 					return true;
 				}
 				foreach (Tile neighborOfNeighbor in neighbor.neighbors.Values) {
-					if (neighborOfNeighbor.HasCity) {
+					if (neighborOfNeighbor.HasCity()) {
 						return true;
 					}
 				}

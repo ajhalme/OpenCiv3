@@ -1,4 +1,5 @@
 using static C7GameData.PlayerRelationship;
+using static C7GameData.Tile;
 
 namespace C7GameData {
 	using Serilog;
@@ -63,6 +64,10 @@ namespace C7GameData {
 		}
 
 		internal MapUnit() { }
+
+		public static bool IsMapUnitValid(MapUnit mapUnit) {
+			return mapUnit != null && mapUnit != MapUnit.NONE;
+		}
 
 		public bool IsBusy() {
 			return isFortified || (path != null && path.PathLength() > 0) || WorkerJob != null || isAutomated;
@@ -231,7 +236,7 @@ namespace C7GameData {
 				new MsgUnitMoved(this).send();
 		}
 
-		public void animate(MapUnit.AnimatedAction action, AnimationEnding ending = AnimationEnding.Stop) {
+		public void animate(AnimatedAction action, AnimationEnding ending = AnimationEnding.Stop) {
 			_ = animateAsync(action, ending);
 		}
 
@@ -239,11 +244,11 @@ namespace C7GameData {
 			if (action != AnimatedAction.RUN) return false;
 
 			// as soon as we move, the tile we were just on becomes the previous tile
-			var isOnRailroad = Tile.IsTileValid(this.previousLocation) && this.previousLocation.overlays.HasRailroad();
+			var isOnRailroad = Tile.IsTileValid(this.previousLocation) && this.previousLocation.HasRailroad();
 			if (!isOnRailroad) return false;
 
 			// and the tile we are moving towards, becomes the current tile
-			var movingOnRailroad = Tile.IsTileValid(this.location) && this.location.overlays.HasRailroad();
+			var movingOnRailroad = Tile.IsTileValid(this.location) && this.location.HasRailroad();
 			if (!movingOnRailroad) return false;
 
 			var canMoveFreely = Player.CanMoveFreely(this.owner, this.previousLocation, this.location);
@@ -426,7 +431,7 @@ namespace C7GameData {
 				defensiveBombarder.facingDirection = dBOriginalDirection;
 			}
 
-			bool defenderEligibleToRetreat = defender.hitPointsRemaining > 1 && ! defender.location.HasCity;
+			bool defenderEligibleToRetreat = defender.hitPointsRemaining > 1 && ! defender.location.HasCity();
 
 			// Do combat rounds
 			while (true) {
@@ -495,7 +500,7 @@ namespace C7GameData {
 			if (target != MapUnit.NONE)
 				return true;
 
-			if (tile.HasCity && tile.cityAtTile.owner != owner)
+			if (tile.HasCity() && tile.cityAtTile.owner != owner)
 				return true;
 
 			return false;
@@ -508,7 +513,7 @@ namespace C7GameData {
 			MapUnit target = tile.FindTopDefender(this);
 
 			var hasTargetUnit = target != MapUnit.NONE && target.owner != owner;
-			var hasForeignCity = tile.HasCity && tile.cityAtTile.owner != owner;
+			var hasForeignCity = tile.HasCity() && tile.cityAtTile.owner != owner;
 			var hasCityWalls = hasForeignCity && tile.cityAtTile.GetBuildings().Any(b => b.building.providesWalls);
 			var hasTileImprovements = tile.HasImprovements;
 
@@ -746,7 +751,7 @@ namespace C7GameData {
 
 			// Destroy the enemy city on the tile unless we're the barbarians,
 			// in which case we'll just take some gold.
-			if (tile.HasCity && !owner.IsAtPeaceWith(tile.cityAtTile.owner)) {
+			if (tile.HasCity() && !owner.IsAtPeaceWith(tile.cityAtTile.owner)) {
 				if (owner.isBarbarians) {
 					// TODO: Add rules for how much gold is taken.
 					int goldTaken = tile.cityAtTile.owner.gold / 4;
@@ -1011,13 +1016,13 @@ namespace C7GameData {
 		}
 
 		private static bool HasHostileCity(Tile tile, Player player) {
-			return tile.HasCity && AtWar(player, tile.cityAtTile.owner);
+			return tile.HasCity() && AtWar(player, tile.cityAtTile.owner);
 		}
 		private static bool HasForeignCity(Tile tile, Player player) {
-			return tile.HasCity && tile.cityAtTile.owner != player;
+			return tile.HasCity() && tile.cityAtTile.owner != player;
 		}
 		private static bool HasOwnCity(Tile tile, Player player) {
-			return tile.HasCity && tile.cityAtTile.owner == player;
+			return tile.HasCity() && tile.cityAtTile.owner == player;
 		}
 
 		/// <summary>
@@ -1114,7 +1119,7 @@ namespace C7GameData {
 		}
 
 		public void TryBoardingTransportOnTile(Tile newLoc) {
-			var enteringCity = newLoc.HasCity && newLoc != location;
+			var enteringCity = newLoc.HasCity() && newLoc != location;
 			if (enteringCity || !CanBoardTransportOnTile(newLoc))
 				return;
 
@@ -1261,10 +1266,10 @@ namespace C7GameData {
 			if (!unitType.actions.Contains(UnitAction.BuildCity)) {
 				return false;
 			}
-			if (location.HasCity || !location.IsAllowCities()) {
+			if (location.HasCity() || !location.IsAllowCities()) {
 				return false;
 			}
-			return location.neighbors.Values.All(tile => !tile.HasCity);
+			return location.neighbors.Values.All(tile => !tile.HasCity());
 		}
 
 		public async Task<City?> buildCity(string cityName) {
@@ -1283,17 +1288,20 @@ namespace C7GameData {
 			return city;
 		}
 
-		public bool canPerformTerraformAction(Terraform terraform) {
-			return unitType.terraformActions.Contains(terraform) && terraform.MeetsRequirements(owner, location);
+		public bool CanPerformTerraformAction(Terraform terraform) {
+			return CanPerformTerraformAction(terraform, location);
 		}
 
-		public bool canPerformTerraformAction(Terraform terraform, Tile tile) {
-			return unitType.terraformActions.Contains(terraform) && terraform.MeetsRequirements(owner, tile);
+		public bool CanPerformTerraformAction(Terraform terraform, Tile tile) {
+			var containsTerraform = unitType.terraformActions.Contains(terraform);
+			var meetsRequirements = terraform.MeetsRequirements(owner, tile);
+			var hasCity = tile.HasCity();
+			return containsTerraform && meetsRequirements && !hasCity;
 		}
 
 		// entry point for "manual" job assignment
 		public void PerformTerraformAction(Terraform terraform) {
-			if (!canPerformTerraformAction(terraform)) {
+			if (!CanPerformTerraformAction(terraform)) {
 				log.Warning($"can't perform {terraform.Name} by {this}");
 				return;
 			}
@@ -1387,7 +1395,7 @@ namespace C7GameData {
 		}
 
 		public List<Terraform> GetAvailableTerraforms() {
-			return EngineStorage.gameData.Terraforms.Where(canPerformTerraformAction).ToList();
+			return EngineStorage.gameData.Terraforms.Where(CanPerformTerraformAction).ToList();
 		}
 
 		/**
@@ -1419,7 +1427,7 @@ namespace C7GameData {
 			if (CanBoardTransportOnTile(this.location) && this.loadedOnUnitId == null) {
 				result.Add(UnitAction.Load);
 			}
-			if (CanUnloadToTile(this.location) && this.location.HasCity) {
+			if (CanUnloadToTile(this.location) && this.location.HasCity()) {
 				result.Add(UnitAction.Unload);
 			}
 

@@ -87,7 +87,7 @@ namespace C7Engine {
 			}
 
 			HashSet<Terraform> accessibleTerraforms = EngineStorage.gameData.Terraforms
-													.Where(terr => unit.canPerformTerraformAction(terr, t))
+													.Where(terr => unit.CanPerformTerraformAction(terr, t))
 													.ToHashSet();
 
 			if (accessibleTerraforms.Count == 0) {
@@ -115,7 +115,7 @@ namespace C7Engine {
 		}
 
 		private UnitAI.Result PerformWorkerMove(MapUnit unit, Terraform workerMove) {
-			if (unit.canPerformTerraformAction(workerMove)) {
+			if (unit.CanPerformTerraformAction(workerMove)) {
 				unit.PerformTerraformAction(workerMove);
 				return UnitAI.Result.InProgress;
 			}

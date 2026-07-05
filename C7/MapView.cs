@@ -588,7 +588,7 @@ public partial class LooseView : Node2D {
 	}
 
 	public bool HasCityLabelToHideFromTileInfo(Tile tile) {
-		if (!tile.HasCity) return false;
+		if (!tile.HasCity()) return false;
 
 		var target = mapView.game.tileInfo;
 		if (target == null) return false;
@@ -887,7 +887,7 @@ public partial class MapView : Node2D {
 
 	public void OnCenterCameraOnUnit() {
 		MapUnit currentlySelectedUnit = game.CurrentlySelectedUnit;
-		if (currentlySelectedUnit == MapUnit.NONE || currentlySelectedUnit == null)
+		if (!MapUnit.IsMapUnitValid(currentlySelectedUnit))
 			return;
 		centerCameraOnTile(currentlySelectedUnit.location);
 	}

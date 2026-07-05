@@ -273,7 +273,7 @@ public partial class UnitLayer : LooseLayer {
 		Vector2 animOffset = new Vector2(appearance.offsetX, appearance.offsetY) * MapView.cellSize;
 
 		// If the unit we're about to draw is currently selected, draw the cursor first underneath it
-		if (unit != MapUnit.NONE && unit == looseView.mapView.game.CurrentlySelectedUnit) {
+		if ((unit != MapUnit.NONE) && (unit == looseView.mapView.game.CurrentlySelectedUnit)) {
 			drawCursor(looseView, tileCenter + animOffset);
 		}
 
@@ -320,7 +320,7 @@ public partial class UnitLayer : LooseLayer {
 		// TODO: Maybe add this is as a player configuration for a "harder" mode,
 		// where players can't see how many enemy units there are even in tiles that don't have a city.
 		// RightClickMenu functionality would need to be made configurable if this gets implemented in the future.
-		if (unit.location.HasCity && unit.owner != looseView.mapView.game.controller)
+		if (unit.location.HasCity() && unit.owner != looseView.mapView.game.controller)
 			return;
 
 		// Draw movement indicator for our units

@@ -944,6 +944,8 @@ public partial class Game : Node {
 			return;
 		}
 
+		if (!IsMapUnitValid(CurrentlySelectedUnit)) return;
+
 		if (currentAction == C7Action.UnitHold) {
 			new ActionToEngineMsg(() => CurrentlySelectedUnit?.skipTurn()).send();
 		}
@@ -958,10 +960,6 @@ public partial class Game : Node {
 		}
 
 		if (currentAction == C7Action.UnitDisband) {
-			if (CurrentlySelectedUnit == null || CurrentlySelectedUnit == MapUnit.NONE) {
-				log.Warning("Trying to disband null or NONE unit");
-				return;
-			}
 			popupOverlay.ShowPopup(
 				new ConfirmationPopup(
 					$"Disband {CurrentlySelectedUnit.name}? Pardon me but these are OUR people.\nDo you really want to disband them?",
@@ -980,12 +978,12 @@ public partial class Game : Node {
 			this.SetGotoMode(true);
 		}
 
-		if (currentAction == C7Action.UnitExplore && CurrentlySelectedUnit != MapUnit.NONE) {
-			new ActionToEngineMsg(() => CurrentlySelectedUnit?.explore()).send();
+		if (currentAction == C7Action.UnitExplore) {
+			new ActionToEngineMsg(() => CurrentlySelectedUnit.explore()).send();
 		}
 
-		if (currentAction == C7Action.UnitAutomate && CurrentlySelectedUnit != MapUnit.NONE) {
-			new ActionToEngineMsg(() => CurrentlySelectedUnit?.automate()).send();
+		if (currentAction == C7Action.UnitAutomate) {
+			new ActionToEngineMsg(() => CurrentlySelectedUnit.automate()).send();
 		}
 
 		if (currentAction == C7Action.UnitSentry) {
@@ -996,7 +994,7 @@ public partial class Game : Node {
 			// unimplemented
 		}
 
-		if (currentAction == C7Action.UnitBuildCity && CurrentlySelectedUnit != MapUnit.NONE && (CurrentlySelectedUnit?.canBuildCity() ?? false)) {
+		if (currentAction == C7Action.UnitBuildCity && CurrentlySelectedUnit.canBuildCity()) {
 			EngineStorage.ReadGameData((GameData gameData) => {
 				MapUnit currentUnit = gameData.GetUnit(CurrentlySelectedUnit.id);
 				log.Debug(currentUnit.Describe());
@@ -1008,7 +1006,7 @@ public partial class Game : Node {
 		}
 
 		if (currentAction == C7Action.UnitBombard) {
-			if (CurrentlySelectedUnit != MapUnit.NONE && (CurrentlySelectedUnit?.canBombard() ?? false)) {
+			if (CurrentlySelectedUnit.canBombard()) {
 				EngineStorage.ReadGameData((GameData gameData) => {
 					MapUnit currentUnit = gameData.GetUnit(CurrentlySelectedUnit.id);
 					setBombard(currentUnit);
@@ -1019,19 +1017,23 @@ public partial class Game : Node {
 
 		if (currentAction == C7Action.UnitLoad) {
 			// TODO: Which transport?
-			if (CurrentlySelectedUnit != MapUnit.NONE && CurrentlySelectedUnit != null)
-				new MsgLoadToTransport(CurrentlySelectedUnit.id).send();
+			new MsgLoadToTransport(CurrentlySelectedUnit.id).send();
 		}
 		if (currentAction == C7Action.UnitUnload) {
-			if (CurrentlySelectedUnit != MapUnit.NONE && CurrentlySelectedUnit != null) {
-				new MsgUnloadTransport(CurrentlySelectedUnit.id).send();
-			}
+			new MsgUnloadTransport(CurrentlySelectedUnit.id).send();
 		}
 
 		Terraform terraform = C7Action.ToTerraform(currentAction);
 
-		if (CurrentlySelectedUnit == MapUnit.NONE || CurrentlySelectedUnit == null
-			|| terraform == null || !CurrentlySelectedUnit.canPerformTerraformAction(terraform))
+		// the `r` key is mapped to the 'Build Road' action
+		// if there is a road we want to map this to 'Build Railroad' action
+		if (CurrentlySelectedUnit.location.HasRoad()
+			&& !CurrentlySelectedUnit.location.HasRailroad()
+			&& currentAction == C7Action.UnitBuildRoad) {
+			terraform = C7Action.ToTerraform(C7Action.UnitBuildRailroad);
+		}
+
+		if (terraform == null || !CurrentlySelectedUnit.CanPerformTerraformAction(terraform))
 			return;
 
 		TerrainImprovement replacementTarget = CurrentlySelectedUnit.location.overlays.GetReplacementTarget(terraform);

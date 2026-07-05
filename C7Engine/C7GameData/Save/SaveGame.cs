@@ -106,7 +106,9 @@ namespace C7GameData.Save {
 		private void populateGameDataTileUnitsAndCities(GameData data) {
 			foreach (Tile tile in data.map.tiles) {
 				tile.unitsOnTile = data.mapUnits.Where(unit => unit.location == tile).ToList();
-				tile.cityAtTile = data.cities.Find(city => city.location == tile);
+				var city = data.cities.Find(city => city.location == tile);
+				if (city != null)
+					tile.cityAtTile = city;
 			}
 		}
 
@@ -121,14 +123,17 @@ namespace C7GameData.Save {
 			// convert technologies earlier than the player data,
 			// because we need to fill in current research and research queues
 			ConvertTechnologies(data);
+			ConvertInflow(data);
+			ConvertStrengthBonuses(data);
+			ConvertHealRates(data);
+
+			EngineStorage.gameData = data;
+
 			ConvertMapAndPlayers(data);
 			ConvertBuildings(data);
 			ConvertUnits(data);
-			ConvertInflow(data);
 			ConvertCities(data);
 			ConvertBarbarianInfo(data);
-			ConvertStrengthBonuses(data);
-			ConvertHealRates(data);
 			ConvertCultureGroups(data);
 			ConvertAlliances(data);
 			ConvertAllianceWars(data);

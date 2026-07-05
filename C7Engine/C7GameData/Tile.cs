@@ -1,13 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using C7Engine;
+using C7GameData.Save;
 using Serilog;
+using static C7GameData.City;
+using static C7GameData.TerrainImprovement;
+using static C7GameData.TileOverlays;
 
 namespace C7GameData {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using C7GameData.Save;
-	using C7Engine;
-	using System.Threading.Tasks;
-
 	public class Tile {
 		public enum YieldType {
 			Commerce,
@@ -86,17 +88,68 @@ namespace C7GameData {
 
 		private City _cityAtTile;
 		public City cityAtTile {
-			get { return _cityAtTile; }
+			get => _cityAtTile;
 			set {
 				_cityAtTile = value;
 				if (value != null) {
+					BuildCityCallback();
+				}
+				// Abandon/Destroy city
+				else {
 					ClearTerrainOverlay();
 					overlays.Clear();
+					// TODO: spawn ruins
 				}
 			}
 		}
 
-		public bool HasCity => cityAtTile != null && cityAtTile != City.NONE;
+		private void BuildCityCallback() {
+			var hasRoad = this.HasRoad();
+			var hasRailroad = this.HasRailroad();
+
+			// remove stuff like a forest, jungle etc (whatever can be cleared by a worker action), but not hills/mountains etc
+			if (this.overlayTerrainType.allowedFoliageAction != TerrainType.Civ3FoliageAction.None)
+				ClearTerrainOverlay();
+
+			overlays.Clear();
+
+			// Auto connect cities to adjacent road/railroad network
+			TryAddRoad(this, hasRoad, hasRailroad);
+			TryAddRailroad(this, hasRailroad);
+		}
+
+		public static void TryAddRoad(Tile tile, bool hasRoad, bool hasRailroad) {
+			var shouldConnectToToNetwork = !hasRailroad && tile.neighbors.Any(p => p.Value.HasRoad());
+			if (shouldConnectToToNetwork || hasRoad) {
+				var roadTerraform = ToTerraform(ROAD);
+				if (roadTerraform != null && tile.cityAtTile.owner.HasTech(roadTerraform.RequiredTech)) {
+					tile.overlays.Add(roadTerraform.Improvement);
+				}
+			}
+		}
+		public static void TryAddRailroad(Tile tile, bool hasRailroad) {
+			var shouldConnectToToNetwork = !hasRailroad && tile.neighbors.Any(p => p.Value.HasRailroad());
+			if (shouldConnectToToNetwork || hasRailroad) {
+				var railroadTerraform = ToTerraform(RAILROAD);
+				if (railroadTerraform != null && tile.cityAtTile.owner.HasTech(railroadTerraform.RequiredTech)) {
+					tile.overlays.Add(railroadTerraform.Improvement);
+				}
+			}
+		}
+
+		public bool HasCity(out City city) {
+			city = null;
+			if (IsValidCity(cityAtTile)) {
+				city = cityAtTile;
+				return true;
+			}
+
+			return false;
+		}
+		public bool HasCity() {
+			return HasCity(out _);
+		}
+
 		public CityResident personWorkingTile = null;   //allows us to see if another city is working this tile
 		public bool hasBarbarianCamp = false;
 		//One thing to decide is do we want to have a tile have a list of units on it,
@@ -253,12 +306,39 @@ namespace C7GameData {
 		}
 
 		public bool IsRoaded() {
-			return this.overlays.HasRoad() || this.overlays.HasRailroad();
+			return this.HasRoad() || this.HasRailroad();
+		}
+
+		public bool HasRoad() {
+			if (this.HasRailroad())
+				return true;
+
+			if (this.overlays.terrainImprovementByLayer.TryGetValue(Layer.Roads, out var value)) {
+				if (this.overlays.ImprovementAtLayer(value.layer).key == ROAD)
+					return true;
+			}
+			return false;
+		}
+
+		public bool HasRailroad() {
+			if (this.overlays.terrainImprovementByLayer.TryGetValue(Layer.Roads, out var value)) {
+				if (this.overlays.ImprovementAtLayer(value.layer).key == RAILROAD)
+					return true;
+			}
+			return false;
+		}
+
+		public bool HasIrrigation() {
+			if (this.overlays.terrainImprovementByLayer.TryGetValue(Layer.ResourceDevelopment, out var value)) {
+				if (this.overlays.ImprovementAtLayer(value.layer).key == IRRIGATION)
+					return true;
+			}
+			return false;
 		}
 
 		public TileDirection directionTo(Tile other) {
 			if ((this == NONE) || (other == NONE))
-				throw new System.Exception("Can't get direction toward NONE Tile since it doesn't have a meaningful location");
+				throw new Exception("Can't get direction toward NONE Tile since it doesn't have a meaningful location");
 
 			// We have to use the map helper functions to handle edge wrapping
 			// correctly.
@@ -311,7 +391,7 @@ namespace C7GameData {
 				yield += this.Resource.FoodBonus;
 			}
 
-			if (HasCity) {
+			if (HasCity()) {
 				// All city centers have a food yield of 2, regardless of bonus
 				// food. See https://wiki.civforum.de/wiki/Stadtfeldertrag_(Civ3).
 				yield = 2;
@@ -343,7 +423,7 @@ namespace C7GameData {
 				yield++;
 			}
 
-			if (HasCity) {
+			if (HasCity()) {
 				// City centers always have 1 shield prior to any bonuses
 				// resources, regardless of the terrain.
 				// See https://wiki.civforum.de/wiki/Stadtfeldertrag_(Civ3).
@@ -389,12 +469,15 @@ namespace C7GameData {
 			if (this.Resource != Resource.NONE && player.KnowsAboutResource(Resource)) {
 				yield += this.Resource.CommerceBonus;
 			}
-			if (BordersRiver()) {
+
+			bool borderRiver = this.BordersRiver();
+
+			if (borderRiver) {
 				yield += 1;
 			}
 
 			// See https://wiki.civforum.de/wiki/Stadtfeldertrag_(Civ3)
-			if (HasCity) {
+			if (HasCity()) {
 				int regularCityYield;
 				if (cityAtTile.residents.Count <= EngineStorage.gameData.rules.MaximumLevel1CitySize) {
 					regularCityYield = 1;
@@ -403,7 +486,7 @@ namespace C7GameData {
 				} else {
 					regularCityYield = 3;
 				}
-				if (BordersRiver()) {
+				if (borderRiver) {
 					regularCityYield += 1;
 				}
 				if (this.Resource != Resource.NONE && player.KnowsAboutResource(Resource)) {
@@ -446,14 +529,14 @@ namespace C7GameData {
 		public bool CanBeIrrigated(TerrainImprovement irrigation, Player player) {
 			// Irrigation can't be done if there is no irrigation bonus for the
 			// tile or if there's already an improvement or city on the tile.
-			if (!overlays.CanAdd(irrigation) ||
+			if (!overlays.CanAdd(this, irrigation) ||
 				irrigation.GetYieldBonus(overlayTerrainType, YieldType.Food) <= 0 ||
 				cityAtTile != null) {
 				return false;
 			}
 
 			// If a tile borders a river or fresh water, it has fresh water access.
-			if (BordersRiver() || NeighborsFreshWater()) {
+			if (this.BordersRiver() || this.NeighborsFreshWater()) {
 				return true;
 			}
 
@@ -860,8 +943,15 @@ namespace C7GameData {
 	}
 
 	public class TileOverlays {
+		public const string ROAD = "road";
+		public const string RAILROAD = "railroad";
+		public const string IRRIGATION = "irrigation";
+		public const string MINE = "mine";
+		public const string FORTRESS = "fortress";
+		public const string BARRICADE = "barricade";
+
 		private readonly Tile tile;
-		private Dictionary<TerrainImprovement.Layer, TerrainImprovement> terrainImprovementByLayer = [];
+		public Dictionary<Layer, TerrainImprovement> terrainImprovementByLayer { get; private set; } = [];
 
 		public TileOverlays(Tile tile) {
 			this.tile = tile;
@@ -883,8 +973,8 @@ namespace C7GameData {
 		}
 
 		private static void ApplyTerrainImprovementChange(TerrainImprovement oldImprovement, TerrainImprovement newImprovement) {
-			var roadCreated = oldImprovement == null && newImprovement?.layer == TerrainImprovement.Layer.Roads;
-			var roadRemoved = oldImprovement?.layer == TerrainImprovement.Layer.Roads && newImprovement == null;
+			var roadCreated = oldImprovement == null && newImprovement?.layer == Layer.Roads;
+			var roadRemoved = oldImprovement?.layer == Layer.Roads && newImprovement == null;
 
 			// If there's a change in road coverage, invalidate the cached trade network
 			if (roadCreated || roadRemoved) {
@@ -893,7 +983,7 @@ namespace C7GameData {
 			}
 		}
 
-		public TerrainImprovement ImprovementAtLayer(TerrainImprovement.Layer layer) {
+		public TerrainImprovement ImprovementAtLayer(Layer layer) {
 			terrainImprovementByLayer.TryGetValue(layer, out TerrainImprovement ti);
 			return ti;
 		}
@@ -921,40 +1011,36 @@ namespace C7GameData {
 			return terrainImprovementByLayer.Values;
 		}
 
-		public bool CanAdd(TerrainImprovement improvement) {
-			if (tile.HasCity)
+		public bool CanAdd(Tile targetTile, TerrainImprovement improvement) {
+			var hasCity = targetTile.HasCity();
+
+			// we can't ever add anything on a city tile, except roading
+			if (hasCity && improvement.layer != Layer.Roads)
 				return false;
 
-			if (!terrainImprovementByLayer.TryGetValue(improvement.layer, out var current))
+			var hasImprovement = terrainImprovementByLayer.TryGetValue(improvement.layer, out var current);
+			var canBeReplaced = hasImprovement && current.CanBeReplacedBy(improvement);
+
+			if (hasCity && improvement.layer == Layer.Roads && canBeReplaced)
+				return true;
+
+			if (!hasImprovement)
 				return improvement.upgradesFrom == null;
 
-			return current.CanBeReplacedBy(improvement);
-		}
-
-		public bool HasRoad() {
-			if (terrainImprovementByLayer.TryGetValue(TerrainImprovement.Layer.Roads, out var value)) {
-				if (ImprovementAtLayer(value.layer).key == "road")
-					return true;
-			} else if (tile.HasCity)
-				return true;
-			return false;
-		}
-		public bool HasRailroad() {
-			if (terrainImprovementByLayer.TryGetValue(TerrainImprovement.Layer.Roads, out var value)) {
-				if (ImprovementAtLayer(value.layer).key == "railroad")
-					return true;
-			} else if (tile.HasCity)
-				return true;
-			return false;
+			return canBeReplaced;
 		}
 
 		// Will return a -1 if the tile movement cost is unaffected by the improvements
 		public float MovementCost() {
-			if (terrainImprovementByLayer.TryGetValue(TerrainImprovement.Layer.Roads, out TerrainImprovement road)) {
+			if (terrainImprovementByLayer.TryGetValue(Layer.Roads, out TerrainImprovement road)) {
 				return road.movementCost;
 			}
 
-			if (tile.HasCity) {
+			// since we added roads & railroads on city tiles, this is probably not needed
+			// I am only leaving this here, because it doesn't seem to affect the game
+			// and it's also related to the tile path algorithm, and I think I want to favourite 
+			// going through cities if possible, for better defense.
+			if (tile.HasCity()) {
 				return 0;
 			}
 

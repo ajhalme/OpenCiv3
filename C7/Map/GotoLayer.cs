@@ -78,7 +78,7 @@ public partial class GotoLayer : LooseLayer {
 	public override void drawObject(LooseView looseView, GameData gameData, Tile tile, Vector2 tileCenter) {
 		MapUnit unit = looseView.mapView.game.CurrentlySelectedUnit;
 		// When no unit is selected, at the end of a turn for example, we don't need to draw anything
-		if (looseView.mapView.game.gotoInfo == null || unit == MapUnit.NONE || unit == null) {
+		if (looseView.mapView.game.gotoInfo == null || !MapUnit.IsMapUnitValid(unit)) {
 			return;
 		}
 

@@ -8,6 +8,7 @@ using Serilog;
 using static C7GameData.EraUtils;
 using static C7GameData.MultiTurnDeal;
 using static C7GameData.PlayerRelationship;
+using static C7GameData.Tile;
 
 namespace C7GameData {
 
@@ -642,11 +643,17 @@ namespace C7GameData {
 					continue;
 				}
 
-				if (g.prerequisiteTech == null || knownTechs.Contains(g.prerequisiteTech)) {
+				if (this.HasTech(g.prerequisiteTech)) {
+
 					result.Add(g);
 				}
 			}
 			return result;
+		}
+
+		public bool HasTech(ID techId) {
+			bool hasTech = techId == null || this.knownTechs.Contains(techId);
+			return hasTech;
 		}
 
 		// See https://forums.civfanatics.com/threads/everything-about-corruption-c3c-edition.76619/
@@ -846,6 +853,9 @@ namespace C7GameData {
 			}
 
 			knownTechs.Add(tech.id);
+			// trigger callback for techs that enable improvements to redraw map
+			TechImprovementCallback(this, tech);
+
 			SetCurrentlyResearchedTech(null);
 
 			// remove completed tech from the current research queue
@@ -855,6 +865,17 @@ namespace C7GameData {
 
 			if (CanAdvanceToNextEra(gameData)) {
 				eraCivilopediaName = GetNextEraNameByIndex(EraIndex());
+			}
+		}
+
+		private static void TechImprovementCallback(Player player, Tech tech) {
+			var terraforms = EngineStorage.gameData.Terraforms;
+			if (terraforms.Any(t => t.Improvement is { layer: TerrainImprovement.Layer.Roads } && t.RequiredTech == tech.id)) {
+				foreach (var city in player.cities) {
+					var cityLoc = city.location;
+					TryAddRoad(cityLoc, cityLoc.HasRoad(), cityLoc.HasRailroad());
+					TryAddRailroad(cityLoc, cityLoc.HasRailroad());
+				}
 			}
 		}
 
@@ -1017,7 +1038,7 @@ namespace C7GameData {
 		// Returns a list of specialists that this player can use.
 		public List<CitizenType> GetKnownSpecialists(GameData gameData) {
 			return gameData.citizenTypes.FindAll(x => {
-				return !x.IsDefaultCitizen && (x.PrerequisiteTech == null || knownTechs.Contains(x.PrerequisiteTech));
+				return !x.IsDefaultCitizen && this.HasTech(x.PrerequisiteTech);
 			});
 		}
 

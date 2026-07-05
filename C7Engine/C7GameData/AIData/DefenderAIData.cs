@@ -18,7 +18,7 @@ namespace C7GameData.AIData {
 		public TilePath pathToDestination;
 
 		public override string ToString() {
-			string cityName = destination.HasCity ? destination.cityAtTile.name : " at " + destination.ToString();
+			string cityName = destination.HasCity() ? destination.cityAtTile.name : " at " + destination.ToString();
 			return goal + " " + cityName;
 		}
 	}
