@@ -1289,10 +1289,7 @@ namespace C7GameData {
 		}
 
 		public bool CanPerformTerraformAction(Terraform terraform) {
-			var containsTerraform = unitType.terraformActions.Contains(terraform);
-			var meetsRequirements = terraform.MeetsRequirements(owner, location);
-			var hasCity = location.HasCity();
-			return containsTerraform && meetsRequirements && !hasCity;
+			return CanPerformTerraformAction(terraform, location);
 		}
 
 		public bool CanPerformTerraformAction(Terraform terraform, Tile tile) {

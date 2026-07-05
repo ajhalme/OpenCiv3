@@ -8,6 +8,7 @@ using Serilog;
 using static C7GameData.EraUtils;
 using static C7GameData.MultiTurnDeal;
 using static C7GameData.PlayerRelationship;
+using static C7GameData.Tile;
 
 namespace C7GameData {
 
@@ -852,6 +853,9 @@ namespace C7GameData {
 			}
 
 			knownTechs.Add(tech.id);
+			// trigger callback for techs that enable improvements to redraw map
+			TechImprovementCallback(this, tech);
+
 			SetCurrentlyResearchedTech(null);
 
 			// remove completed tech from the current research queue
@@ -861,6 +865,15 @@ namespace C7GameData {
 
 			if (CanAdvanceToNextEra(gameData)) {
 				eraCivilopediaName = GetNextEraNameByIndex(EraIndex());
+			}
+		}
+
+		private static void TechImprovementCallback(Player player, Tech tech) {
+			if (EngineStorage.gameData.Terraforms.Any(t => t.Improvement.layer == TerrainImprovement.Layer.Roads && t.RequiredTech == tech.id)) {
+				foreach (var city in player.cities) {
+					TryAddRoad(city.location, city.location.HasRoad(), city.location.HasRailroad());
+					TryAddRailroad(city.location, city.location.HasRailroad());
+				}
 			}
 		}
 

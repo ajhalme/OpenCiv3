@@ -114,16 +114,25 @@ namespace C7GameData {
 			overlays.Clear();
 
 			// Auto connect cities to adjacent road/railroad network
-			if ((!hasRoad && !hasRailroad && this.neighbors.Any(p => p.Value.HasRoad()) || hasRoad)) {
+			TryAddRoad(this, hasRoad, hasRailroad);
+			TryAddRailroad(this, hasRailroad);
+		}
+
+		public static void TryAddRoad(Tile tile, bool hasRoad, bool hasRailroad) {
+			var shouldConnectToToNetwork = !hasRailroad && tile.neighbors.Any(p => p.Value.HasRoad());
+			if (shouldConnectToToNetwork || hasRoad) {
 				var roadTerraform = ToTerraform(ROAD);
-				if (roadTerraform != null && _cityAtTile.owner.HasTech(roadTerraform.RequiredTech)) {
-					this.overlays.Add(roadTerraform.Improvement);
+				if (roadTerraform != null && tile.cityAtTile.owner.HasTech(roadTerraform.RequiredTech)) {
+					tile.overlays.Add(roadTerraform.Improvement);
 				}
 			}
-			if ((!hasRailroad && this.neighbors.Any(p => p.Value.HasRailroad()) || hasRailroad)) {
+		}
+		public static void TryAddRailroad(Tile tile, bool hasRailroad) {
+			var shouldConnectToToNetwork = !hasRailroad && tile.neighbors.Any(p => p.Value.HasRailroad());
+			if (shouldConnectToToNetwork || hasRailroad) {
 				var railroadTerraform = ToTerraform(RAILROAD);
-				if (railroadTerraform != null && _cityAtTile.owner.HasTech(railroadTerraform.RequiredTech)) {
-					this.overlays.Add(railroadTerraform.Improvement);
+				if (railroadTerraform != null && tile.cityAtTile.owner.HasTech(railroadTerraform.RequiredTech)) {
+					tile.overlays.Add(railroadTerraform.Improvement);
 				}
 			}
 		}
@@ -1005,16 +1014,20 @@ namespace C7GameData {
 		public bool CanAdd(Tile targetTile, TerrainImprovement improvement) {
 			var hasCity = targetTile.HasCity();
 
-			if (hasCity && improvement.layer == Layer.Roads)
-				return true;
-
-			if (hasCity)
+			// we can't ever add anything on a city tile, except roading
+			if (hasCity && improvement.layer != Layer.Roads)
 				return false;
 
-			if (!terrainImprovementByLayer.TryGetValue(improvement.layer, out var current))
+			var hasImprovement = terrainImprovementByLayer.TryGetValue(improvement.layer, out var current);
+			var canBeReplaced = hasImprovement && current.CanBeReplacedBy(improvement);
+
+			if (hasCity && improvement.layer == Layer.Roads && canBeReplaced)
+				return true;
+
+			if (!hasImprovement)
 				return improvement.upgradesFrom == null;
 
-			return current.CanBeReplacedBy(improvement);
+			return canBeReplaced;
 		}
 
 		// Will return a -1 if the tile movement cost is unaffected by the improvements
