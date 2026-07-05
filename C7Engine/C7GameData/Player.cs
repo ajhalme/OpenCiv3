@@ -869,10 +869,12 @@ namespace C7GameData {
 		}
 
 		private static void TechImprovementCallback(Player player, Tech tech) {
-			if (EngineStorage.gameData.Terraforms.Any(t => t.Improvement.layer == TerrainImprovement.Layer.Roads && t.RequiredTech == tech.id)) {
+			var terraforms = EngineStorage.gameData.Terraforms;
+			if (terraforms.Any(t => t.Improvement is { layer: TerrainImprovement.Layer.Roads } && t.RequiredTech == tech.id)) {
 				foreach (var city in player.cities) {
-					TryAddRoad(city.location, city.location.HasRoad(), city.location.HasRailroad());
-					TryAddRailroad(city.location, city.location.HasRailroad());
+					var cityLoc = city.location;
+					TryAddRoad(cityLoc, cityLoc.HasRoad(), cityLoc.HasRailroad());
+					TryAddRailroad(cityLoc, cityLoc.HasRailroad());
 				}
 			}
 		}
