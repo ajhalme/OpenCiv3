@@ -1,4 +1,5 @@
 -- Base paths
+local ROOT = "Art/"
 local ADVISORS = "Art/Advisors/"
 
 local BUTTONS = "Art/buttonsFINAL.pcx"
@@ -17,6 +18,7 @@ local CITY_ICONS = "Art/Cities/city icons.pcx"
 
 local CREDITS = "Art/Credits/"
 local PALACE = "Art/PalaceView/"
+local SPACE_RACE = "Art/SpaceShip/"
 
 local POPUP_BORDERS = "Art/popupborders.pcx"
 
@@ -79,6 +81,53 @@ textures.advisors = {
       },
     },
   },
+  trade = {
+    background = ADVISORS .. "trade.pcx",
+  },
+  foreign = {
+    background = ADVISORS .. "foreign.pcx",
+    navigation = {
+      treaties = {
+        path = ADVISORS .. "foreignTAB.pcx",
+        crop_region = { 1, 1, 223, 236 },
+      },
+      trades = {
+        path = ADVISORS .. "foreignTAB.pcx",
+        crop_region = { 225, 1, 223, 236 },
+      },
+      details = {
+        path = ADVISORS .. "foreignTAB.pcx",
+        crop_region = { 449, 1, 223, 236 },
+      }
+    }
+  },
+  culture = {
+    background = ADVISORS .. "culture.pcx",
+  }
+}
+
+textures.screens = {
+  wonders = {
+    background = ADVISORS .. "wonders_background.pcx",
+  },
+  standing = {
+    victory_status = {
+      background = ROOT .. "histograph-win5_final.pcx",
+    },
+    histogram = {
+      background = ROOT .. "histograph-top5_final.pcx",
+    }
+  },
+  space_race = {
+    background = SPACE_RACE .. "SHIPbackground.pcx",
+  },
+  palace = {
+    background = PALACE .. "bkgr.pcx",
+  },
+  demographics = {
+    background = ADVISORS .. "demographics.pcx",
+  },
+
 }
 
 textures.ui = {
@@ -276,6 +325,10 @@ textures.icons = {
     path = ADVISORS .. "domestic_icons_aux.pcx",
     crop_region = { 51, 1, 22, 22 },
   },
+  maintenance = {
+    path = ADVISORS .. "domestic_icons_aux.pcx",
+    crop_region = { 1, 1, 19, 34 },
+  },
   capital_star = {
     path = CITY_ICONS,
     crop_region = { 20, 1, 18, 18 },
@@ -343,10 +396,6 @@ textures.city_screen = {
     },
   },
   production_queue = CITY_SCREEN .. "ProductionQueueBox.pcx",
-}
-
-textures.palace = {
-  background = PALACE .. "bkgr.pcx",
 }
 
 textures.world_setup = require "textures.world_setup"

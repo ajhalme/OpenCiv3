@@ -310,26 +310,20 @@ public partial class Game : Node {
 				break;
 			case MsgShowMilitaryAdvisorPopup mSMAP:
 				if (!popupOverlay.Visible) {
-					popupOverlay.ShowPopup(
-						new InformationalPopup(mSMAP.message, AdvisorHead.Advisor.Military, mSMAP.happy ? AdvisorHead.Mood.Happy : AdvisorHead.Mood.Angry),
-						PopupOverlay.PopupCategory.Advisor);
+					var mood = mSMAP.happy ? AdvisorHead.Mood.Happy : AdvisorHead.Mood.Angry;
+					var pop = new InformationalPopup(mSMAP.message, AdvisorHead.Advisor.Military, mood);
+					popupOverlay.ShowPopup(pop, PopupOverlay.PopupCategory.Advisor);
 				}
 				break;
 			case MsgShowScienceAdvisor mSSA:
-				// F6 is the science advisor.
-				// TODO: Move the F* key strings to a set of constants/enum.
-				EmitSignal(SignalName.ShowSpecificAdvisor, "F6");
+				EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowScienceAdvisor);
 				break;
 			case MsgUpdateUiAfterDomesticChange mUUASC:
-				// F1 is the domestic advisor.
-				// TODO: Move the F* key strings to a set of constants/enum.
-
-				// Ensure the citizen moods are correct before displaying
-				// them.
+				// Ensure the citizen moods are correct before displaying them.
 				foreach (City c in controller.cities) {
 					c.RecalculateCitizenMoods(gameData);
 				}
-				EmitSignal(SignalName.ShowSpecificAdvisor, "F1");
+				EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowDomesticAdvisor);
 				break;
 			case MsgShowTradeOffer mSTO:
 				diplomacy.ShowDealScreenForPlayer(
@@ -524,7 +518,7 @@ public partial class Game : Node {
 
 	public override void _UnhandledInput(InputEvent @event) {
 		// Don't handle mouse actions if UI elements are visible, or it's the AI's turn
-		if (popupOverlay.Visible || cityScreen.Visible || advisor.Visible || diplomacy.Visible || palaceScene.Visible || CurrentState == GameState.ComputerTurn) {
+		if (popupOverlay.Visible || cityScreen.Visible || diplomacy.Visible || palaceScene.Visible || CurrentState == GameState.ComputerTurn) {
 			IsMovingCamera = false;
 			return;
 		}
@@ -743,13 +737,22 @@ public partial class Game : Node {
 			ToggleObserverMode();
 		}
 		if (eventKeyDown.Keycode == Godot.Key.F1) {
-			EmitSignal(SignalName.ShowSpecificAdvisor, "F1");
+			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowDomesticAdvisor);
+		}
+		if (eventKeyDown.Keycode == Godot.Key.F2) {
+			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowTradeAdvisor);
 		}
 		if (eventKeyDown.Keycode == Godot.Key.F3) {
-			EmitSignal(SignalName.ShowSpecificAdvisor, "F3");
+			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowMilitaryAdvisor);
+		}
+		if (eventKeyDown.Keycode == Godot.Key.F4) {
+			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowForeignAdvisor);
+		}
+		if (eventKeyDown.Keycode == Godot.Key.F5) {
+			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowCulturalAdvisor);
 		}
 		if (eventKeyDown.Keycode == Godot.Key.F6) {
-			EmitSignal(SignalName.ShowSpecificAdvisor, "F6");
+			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowScienceAdvisor);
 		}
 		if (eventKeyDown.Keycode == Godot.Key.F9) {
 			palaceScene.Show();

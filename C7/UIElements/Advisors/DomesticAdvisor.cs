@@ -44,6 +44,10 @@ public partial class DomesticAdvisor : Control {
 	private int scienceSliderY = 84;
 	private int luxurySliderY = 130;
 
+	public DomesticAdvisor() {
+		MouseFilter = MouseFilterEnum.Stop;
+	}
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
 		this.CreateUI();
@@ -52,6 +56,8 @@ public partial class DomesticAdvisor : Control {
 	private void CreateUI() {
 		ImageTexture DomesticBackground = TextureLoader.Load("advisors.domestic.background");
 		background.Texture = DomesticBackground;
+
+		AdvisorUtils.CreateAdvisorTitle(background, background.Texture.GetWidth(), "DOMESTIC ADVISOR");
 
 		advisorHead.Texture = AdvisorHead.GetPopupImage(AdvisorHead.Advisor.Domestic, AdvisorHead.Mood.Happy, eraIndex: 0);
 		advisorHead.SetPosition(new Vector2(851, 0));
