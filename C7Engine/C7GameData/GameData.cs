@@ -130,22 +130,23 @@ namespace C7GameData {
 		}
 
 		// Players are in an active locked war (can't make peace)
-		private bool AreInLockedWar(Alliance one, Alliance other) {
+		private bool AreAlliancesInLockedWar(Alliance one, Alliance other) {
 			return allianceWars.Any(
 				kvp => (one != null && other != null) &&
 					((kvp.Key.name == one.name && kvp.Value.name == other.name)
 					|| (kvp.Key.name == other.name && kvp.Value.name == one.name)));
 		}
 		public bool AreInLockedWar(Player one, Player other) {
-			return AreInLockedWar(one.alliance, other.alliance);
+			return AreAlliancesInLockedWar(one.alliance, other.alliance) && one != other;
 		}
 
 		// Both players are part of the same alliance (can't declare war)
-		private bool AreInLockedPeace(Alliance one, Alliance other) {
+		// We exclude ourselves from this.
+		private bool AreInSameAlliance(Alliance one, Alliance other) {
 			return one != null && other != null && one == other;
 		}
 		public bool AreInLockedPeace(Player one, Player other) {
-			return AreInLockedPeace(one.alliance, other.alliance);
+			return AreInSameAlliance(one.alliance, other.alliance) && one != other;
 		}
 
 		public void UpdateTileOwners() {

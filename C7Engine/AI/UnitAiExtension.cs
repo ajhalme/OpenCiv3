@@ -30,7 +30,7 @@ namespace C7Engine {
 				return UnitAI.Result.InProgress;
 			}
 
-			Task<bool> moveTask = unit.move(unit.location.directionTo(nextTile));
+			Task<bool> moveTask = unit.Move(unit.location.directionTo(nextTile));
 
 			return MoveResult.MoveRequested(moveTask);
 		}

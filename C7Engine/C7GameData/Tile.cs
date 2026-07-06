@@ -806,20 +806,47 @@ namespace C7GameData {
 			return result;
 		}
 
+		public MapUnit FindTopDefenderForBombard(MapUnit opponent) {
+			return FindTopDefenderForBombard(this, opponent);
+		}
+
+		public MapUnit FindTopDefenderForBombard(Tile tile, MapUnit opponent) {
+			MapUnit target;
+			var combatUnits = tile.unitsOnTile.Where(u => u.IsCombatUnit()).ToList();
+
+			if ((tile.IsLand() && opponent.unitType.isLandBombardmentLethal) || (tile.IsWater() && opponent.unitType.isSeaBombardmentLethal))
+				target = FindTopCombatUnit(opponent, combatUnits);
+			else
+				target = FindTopCombatUnit(opponent, combatUnits.Where(u => u.hitPointsRemaining > 1).ToList());
+
+			return target;
+		}
+
 		public MapUnit FindTopDefender(MapUnit opponent) {
-			if (unitsOnTile.Count > 0) {
-				IEnumerable<MapUnit> potentialDefenders = unitsOnTile.Where(u => u.CanDefendAgainst(opponent));
+			return FindTopDefender(opponent, unitsOnTile);
+		}
+
+		public MapUnit FindTopDefender(MapUnit opponent, List<MapUnit> units) {
+			if (units.Count > 0) {
+				List<MapUnit> potentialDefenders = units.Where(u => u.CanDefendAgainst(opponent)).ToList();
 				if (potentialDefenders.Count() == 0) {
 					return MapUnit.NONE;
 				}
 
-				MapUnit leadingCandidate = unitsOnTile[0];
-				foreach (MapUnit u in unitsOnTile)
-					if (u.HasPriorityAsDefender(leadingCandidate, opponent))
-						leadingCandidate = u;
-				return leadingCandidate;
-			} else
-				return MapUnit.NONE;
+				return FindTopCombatUnit(opponent, potentialDefenders);
+			}
+
+			return MapUnit.NONE;
+		}
+
+		public MapUnit FindTopCombatUnit(MapUnit opponent, List<MapUnit> units) {
+			if (units.Count < 1) return MapUnit.NONE;
+
+			MapUnit leadingCandidate = units[0];
+			foreach (MapUnit u in units)
+				if (u.HasPriorityAsDefender(leadingCandidate, opponent))
+					leadingCandidate = u;
+			return leadingCandidate;
 		}
 
 		/// <summary>
@@ -958,6 +985,9 @@ namespace C7GameData {
 		}
 
 		public void Add(TerrainImprovement improvement) {
+			if (improvement == null) {
+				return;
+			}
 			terrainImprovementByLayer.TryGetValue(improvement.layer, out TerrainImprovement replacedImprovement);
 
 			terrainImprovementByLayer[improvement.layer] = improvement;

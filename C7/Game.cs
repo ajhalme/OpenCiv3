@@ -52,25 +52,36 @@ public class TileInfo {
 public class BombardInfo {
 	public MapUnit bombardingUnit;
 	public Tile mouseTile;
+	public MapUnit.BombardTarget bombardTarget = MapUnit.BombardTarget.None;
 
 	public BombardInfo(MapUnit bombardingUnit) {
 		this.bombardingUnit = bombardingUnit;
 	}
 
-	public bool requiresWarDeclaration(Tile tile, out Player player) {
+	public bool RequiresWarDeclaration(Tile tile, out Player player) {
 		player = null;
 
 		var bombarder = bombardingUnit.owner;
-		var foreignUnits = tile.unitsOnTile.Where(x => x.owner != bombarder).ToList();
-		if (!foreignUnits.Any())
+
+		if (bombardTarget == MapUnit.BombardTarget.None)
 			return false;
 
-		var targetPlayers = foreignUnits.Select(x => x.owner).Distinct();
-		var friendly= targetPlayers.Where(p => bombarder.IsAtPeaceWith(p)).ToList();
-		player = friendly.FirstOrDefault();
-		return friendly.Any();
+		if (bombardTarget == MapUnit.BombardTarget.City) {
+			player = tile.owningCity.owner;
+			return bombarder.IsAtPeaceWith(player);
+		}
 
-		// TODO: handle complex scenarios arising from multiple civs co-located on tile
+		if (bombardTarget == MapUnit.BombardTarget.Unit) {
+			player = tile.unitsOnTile.First().owner;
+			return bombarder.IsAtPeaceWith(player);
+		}
+
+		if (bombardTarget == MapUnit.BombardTarget.Improvement) {
+			player = tile.OwningPlayer();
+			return player != null && player != bombarder && bombarder.IsAtPeaceWith(player);
+		}
+
+		throw new NotImplementedException($"A case is missing here. {tile} | {player} | {bombardTarget}");
 	}
 };
 
@@ -598,10 +609,11 @@ public partial class Game : Node {
 			this.SetGotoMode(false);
 		} else if (bombardInfo != null) {
 			Tile tile = PositionToTile(eventMouseButton.Position);
-			if (bombardInfo.bombardingUnit.canBombardTile(tile)) {
+			if (bombardInfo.bombardingUnit.CanBombardTile(tile, out var bombardTarget)) {
+				bombardInfo.bombardTarget = bombardTarget;
 				HandleBombardClick(bombardInfo, tile);
-				setBombard(null);
 			}
+			setBombard(null);
 		} else {
 			// Select unit on tile at mouse location
 			HandleUnitSelectionTileClick(eventMouseButton);
@@ -667,8 +679,10 @@ public partial class Game : Node {
 
 		var activeTile = controller.tileKnowledge.isActiveTile(tile);
 
+		if (bombardInfo != null)
+			setBombard(null);
 		// Handle the shortcut of shift+right clicking a city to get the change production menu.
-		if (shiftDown && activeTile && tile.cityAtTile?.owner == controller)
+		else if (shiftDown && activeTile && tile.cityAtTile?.owner == controller)
 			new RightClickChooseProductionMenu(this, tile.cityAtTile).Open(eventMouseButton.Position);
 		else if (!shiftDown && activeTile && tile.unitsOnTile.Count > 0)
 			// There are units on this title, so open that menu.
@@ -676,8 +690,6 @@ public partial class Game : Node {
 		else if (!shiftDown && activeTile && tile.cityAtTile?.owner == controller)
 			// There are no units, but this is the player's city.
 			new RightClickCityMenu(this, tile).Open(eventMouseButton.Position);
-		else if (bombardInfo != null)
-			setBombard(null);
 		else
 			ShowTileInfo(tile);
 
@@ -947,7 +959,7 @@ public partial class Game : Node {
 		if (!IsMapUnitValid(CurrentlySelectedUnit)) return;
 
 		if (currentAction == C7Action.UnitHold) {
-			new ActionToEngineMsg(() => CurrentlySelectedUnit?.skipTurn()).send();
+			new ActionToEngineMsg(() => CurrentlySelectedUnit?.SkipTurn()).send();
 		}
 
 		if (currentAction == C7Action.UnitWait) {
@@ -979,11 +991,11 @@ public partial class Game : Node {
 		}
 
 		if (currentAction == C7Action.UnitExplore) {
-			new ActionToEngineMsg(() => CurrentlySelectedUnit.explore()).send();
+			new ActionToEngineMsg(() => CurrentlySelectedUnit.Explore()).send();
 		}
 
 		if (currentAction == C7Action.UnitAutomate) {
-			new ActionToEngineMsg(() => CurrentlySelectedUnit.automate()).send();
+			new ActionToEngineMsg(() => CurrentlySelectedUnit.Automate()).send();
 		}
 
 		if (currentAction == C7Action.UnitSentry) {
@@ -1006,7 +1018,7 @@ public partial class Game : Node {
 		}
 
 		if (currentAction == C7Action.UnitBombard) {
-			if (CurrentlySelectedUnit.canBombard()) {
+			if (CurrentlySelectedUnit.HasBombardAbility()) {
 				EngineStorage.ReadGameData((GameData gameData) => {
 					MapUnit currentUnit = gameData.GetUnit(CurrentlySelectedUnit.id);
 					setBombard(currentUnit);
@@ -1196,7 +1208,7 @@ public partial class Game : Node {
 		}
 
 		EngineStorage.ReadGameData((GameData gameData) => {
-			if (info.requiresWarDeclaration(tile, out var player)) {
+			if (info.RequiresWarDeclaration(tile, out var player)) {
 				MaybeDeclareWar(player, gameData.turn, () => {
 					new MsgBombard(CurrentlySelectedUnit.id, tile).send();
 				});

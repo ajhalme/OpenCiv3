@@ -83,6 +83,27 @@ namespace C7GameData {
 			}
 		}
 
+		public bool isLandBombardmentLethal {
+			get => flags.Contains(SaveUnitPrototype.Flag.LethalLandBombardment);
+			set {
+				if (value) {
+					flags.Add(SaveUnitPrototype.Flag.LethalLandBombardment);
+				} else {
+					flags.Remove(SaveUnitPrototype.Flag.LethalLandBombardment);
+				}
+			}
+		}
+		public bool isSeaBombardmentLethal {
+			get => flags.Contains(SaveUnitPrototype.Flag.LethalSeaBombardment);
+			set {
+				if (value) {
+					flags.Add(SaveUnitPrototype.Flag.LethalSeaBombardment);
+				} else {
+					flags.Remove(SaveUnitPrototype.Flag.LethalSeaBombardment);
+				}
+			}
+		}
+
 		public HashSet<string> categories = new HashSet<string>();
 
 		public HashSet<UnitAction> actions = [];

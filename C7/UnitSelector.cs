@@ -107,7 +107,7 @@ public partial class UnitSelector : Node {
 
 		// Also emit the signal for a new unit being selected, so other areas such as Game Status and Unit Buttons can update
 		if (CurrentlySelectedUnit != MapUnit.NONE) {
-			unit.wake();
+			unit.Wake();
 			NoMoreAutoselectableUnitsEmitted = false;
 			ParameterWrapper<MapUnit> wrappedUnit = new(CurrentlySelectedUnit);
 			PreLoadUnitAnimationThumbnail(wrappedUnit.Value);
