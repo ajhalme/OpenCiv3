@@ -7,7 +7,9 @@ namespace C7GameData.Save {
 			RotateBeforeAttack,
 			CanCarryFootUnitsOnly,
 			CanCarryAircraft,
-			CanCarryTacticalMissiles
+			CanCarryTacticalMissiles,
+			LethalLandBombardment,
+			LethalSeaBombardment,
 		}
 
 		public string name { get; set; }

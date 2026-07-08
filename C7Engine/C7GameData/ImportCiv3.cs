@@ -1332,6 +1332,8 @@ namespace C7GameData {
 				if (prto.CanCarryFootUnitsOnly) prototype.flags.Add(SaveUnitPrototype.Flag.CanCarryFootUnitsOnly);
 				if (prto.CanCarryAircraft) prototype.flags.Add(SaveUnitPrototype.Flag.CanCarryAircraft);
 				if (prto.CanCarryTacticalMissiles) prototype.flags.Add(SaveUnitPrototype.Flag.CanCarryTacticalMissiles);
+				if (prto.LethalLandBombardment) prototype.flags.Add(SaveUnitPrototype.Flag.LethalLandBombardment);
+				if (prto.LethalSeaBombardment) prototype.flags.Add(SaveUnitPrototype.Flag.LethalSeaBombardment);
 
 				prototype.actions.UnionWith(GetUnitActions(prto));
 				prototype.terraformActions.UnionWith(GetUnitTerraforms(prto).Select(tfKey => terraformIdByCiv3Key[tfKey]));

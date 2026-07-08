@@ -37,9 +37,9 @@ namespace C7Engine {
 			// invalid actions at the server level but at the client level an invalid action received from the server indicates a desync.
 			if (unit != null) {
 				if (fortifyElseWake)
-					unit.fortify();
+					unit.Fortify();
 				else
-					unit.wake();
+					unit.Wake();
 			}
 		}
 	}
@@ -57,7 +57,7 @@ namespace C7Engine {
 			MapUnit unit = EngineStorage.gameData.GetUnit(unitID);
 			if (unit == null) return;
 
-			await unit.move(dir, true);
+			await unit.Move(dir, true);
 		}
 	}
 
@@ -74,7 +74,7 @@ namespace C7Engine {
 			MapUnit unit = EngineStorage.gameData.GetUnit(unitID);
 			if (unit == null) return;
 
-			await unit.setUnitPath(path);
+			await unit.SetUnitPath(path);
 		}
 	}
 
@@ -95,7 +95,7 @@ namespace C7Engine {
 			Tile tile = EngineStorage.gameData.map.tileAt(tileX, tileY);
 			if (unit == null || tile == null) return;
 
-			await unit.bombard(tile);
+			await unit.Bombard(tile);
 		}
 	}
 
@@ -433,7 +433,7 @@ namespace C7Engine {
 		}
 
 		public override async void process() {
-			City? city = await unit.buildCity(name);
+			City? city = await unit.BuildCity(name);
 			if (city != null) {
 				new MsgCityCreated(city).send();
 			}

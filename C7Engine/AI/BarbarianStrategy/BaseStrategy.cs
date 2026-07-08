@@ -19,7 +19,7 @@ internal abstract class BaseStrategy : IBarbarianStrategy {
 
 		// Wake up the unit if there's a reason to do so
 		if (ShouldWake(player, unit))
-			unit.wake();
+			unit.Wake();
 
 		// Skip units that didn't wake up
 		if (unit.isFortified)

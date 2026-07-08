@@ -47,7 +47,7 @@ namespace C7Engine.AI.UnitAI {
 		C7GameData.UnitAI.MoveResult C7GameData.UnitAI.PlayTurnImpl(Player player, MapUnit unit) {
 			if (data.destination == unit.location) {
 				if (!unit.isFortified) {
-					unit.fortify();
+					unit.Fortify();
 					log.Information("Fortifying " + unit + " at " + data.destination);
 				}
 				return C7GameData.UnitAI.Result.Done;

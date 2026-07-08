@@ -68,7 +68,7 @@ namespace C7Engine {
 				// Wake up any fortified units so our new strategy (if we have one)
 				// takes effect.
 				foreach (MapUnit u in player.units) {
-					u.wake();
+					u.Wake();
 				}
 			} else {
 				player.turnsUntilPriorityReevaluation--;
@@ -106,7 +106,7 @@ namespace C7Engine {
 			foreach (MapUnit u in player.units) {
 				if (u.currentAI is SettlerAI settlerAi && settlerAi.data.escort == null) {
 					foreach (MapUnit uu in u.location.unitsOnTile) {
-						uu.wake();
+						uu.Wake();
 					}
 				}
 			}
