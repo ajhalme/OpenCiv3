@@ -1334,6 +1334,7 @@ namespace C7GameData {
 				if (prto.CanCarryTacticalMissiles) prototype.flags.Add(SaveUnitPrototype.Flag.CanCarryTacticalMissiles);
 				if (prto.LethalLandBombardment) prototype.flags.Add(SaveUnitPrototype.Flag.LethalLandBombardment);
 				if (prto.LethalSeaBombardment) prototype.flags.Add(SaveUnitPrototype.Flag.LethalSeaBombardment);
+				if (prto.Radar) prototype.flags.Add(SaveUnitPrototype.Flag.Radar);
 
 				prototype.actions.UnionWith(GetUnitActions(prto));
 				prototype.terraformActions.UnionWith(GetUnitTerraforms(prto).Select(tfKey => terraformIdByCiv3Key[tfKey]));
@@ -1987,6 +1988,7 @@ namespace C7GameData {
 			save.Rules.ShieldCostPerGold = rule.ShieldsCostPerGold;
 			save.Rules.ShieldRateForDisbanding = 0.25f;
 			save.Rules.AllowLesserUnitProduction = false;
+			save.Rules.RadarTileVisibility = 2;
 		}
 
 		private static void SetWorldWrap(SavData civ3Save, SaveGame save) {

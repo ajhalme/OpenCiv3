@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using C7Engine;
 using C7GameData.Save;
@@ -349,15 +350,17 @@ namespace C7GameData {
 			int dy = map.CalculateYDelta(this.YCoordinate, other.YCoordinate);
 			double angle = Math.Atan2(dy, dx); // angle is in interval [-pi, pi]
 
-			if (angle > 7.0 / 8.0 * Math.PI) return TileDirection.WEST;
-			else if (angle > 5.0 / 8.0 * Math.PI) return TileDirection.NORTHWEST;
-			else if (angle > 3.0 / 8.0 * Math.PI) return TileDirection.NORTH;
-			else if (angle > 1.0 / 8.0 * Math.PI) return TileDirection.NORTHEAST;
-			else if (angle > -1.0 / 8.0 * Math.PI) return TileDirection.EAST;
-			else if (angle > -3.0 / 8.0 * Math.PI) return TileDirection.SOUTHEAST;
-			else if (angle > -5.0 / 8.0 * Math.PI) return TileDirection.SOUTH;
-			else if (angle > -7.0 / 8.0 * Math.PI) return TileDirection.SOUTHWEST;
-			else return TileDirection.WEST;
+			return angle switch {
+				> 7.0 / 8.0 * Math.PI => TileDirection.WEST,
+				> 5.0 / 8.0 * Math.PI => TileDirection.NORTHWEST,
+				> 3.0 / 8.0 * Math.PI => TileDirection.NORTH,
+				> 1.0 / 8.0 * Math.PI => TileDirection.NORTHEAST,
+				> -1.0 / 8.0 * Math.PI => TileDirection.EAST,
+				> -3.0 / 8.0 * Math.PI => TileDirection.SOUTHEAST,
+				> -5.0 / 8.0 * Math.PI => TileDirection.SOUTH,
+				> -7.0 / 8.0 * Math.PI => TileDirection.SOUTHWEST,
+				_ => TileDirection.WEST
+			};
 		}
 
 		/**

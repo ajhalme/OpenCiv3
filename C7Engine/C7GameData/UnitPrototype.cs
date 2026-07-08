@@ -103,6 +103,16 @@ namespace C7GameData {
 				}
 			}
 		}
+		public bool hasRadar {
+			get => flags.Contains(SaveUnitPrototype.Flag.Radar);
+			set {
+				if (value) {
+					flags.Add(SaveUnitPrototype.Flag.Radar);
+				} else {
+					flags.Remove(SaveUnitPrototype.Flag.Radar);
+				}
+			}
+		}
 
 		public HashSet<string> categories = new HashSet<string>();
 
