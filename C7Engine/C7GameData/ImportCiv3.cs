@@ -97,6 +97,7 @@ namespace C7GameData {
 			biq = savData.Bic;
 			pediaIcons = new(getPediaIconsPath(biq.Game[0].ScenarioSearchFolders));
 			save.TurnNumber = savData.Game.TurnNumber;
+			save.Seed = savData.Wrld.WorldSeed;
 
 			ImportSharedBiqData();
 			ImportSavLeaders();
@@ -209,6 +210,7 @@ namespace C7GameData {
 			biq = BiqData.LoadFile(biqPath);
 			defaultBiq = BiqData.LoadFile(defaultBiqPath);
 			pediaIcons = new(getPediaIconsPath(biq.Game[0].ScenarioSearchFolders));
+			save.Seed = biq.Wmap[0].MapSeed;
 
 			ImportSharedBiqData();
 			ImportBicLeaders();
