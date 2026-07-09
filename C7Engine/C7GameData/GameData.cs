@@ -291,6 +291,14 @@ namespace C7GameData {
 			owner.units.Remove(unit);
 
 			log.Information($"Player {owner} removed unit: {unit}");
+
+			// Probably could be optimized, by checking if this unit had radar,
+			// or if there are other units on the tile,
+			// but I don't want to this prematurely here,
+			// since there might be things I am taking into account,
+			// and end up introducing a bunch of bugs.
+			// If it ends up being a problem, we could certainly look into this more.
+			owner.tileKnowledge.RecomputeActiveTiles();
 		}
 
 		internal void SpawnUnit(Player player, UnitPrototype proto, Tile tile) {

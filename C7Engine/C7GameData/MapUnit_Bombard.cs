@@ -148,7 +148,7 @@ namespace C7GameData {
 		private async Task BombardUnits(Tile tile, MapUnit target) {
 			// TODO: Make configurable
 
-			movementPoints.onUnitMove(1); // TODO: UNDO THIS, JUST FOR TESTING
+			movementPoints.onUnitMove(1);
 			await animateAsync(AnimatedAction.ATTACK1);
 
 			// TODO: Figure out the bombard defense that walls grant.

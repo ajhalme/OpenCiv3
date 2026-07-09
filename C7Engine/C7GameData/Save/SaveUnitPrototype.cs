@@ -10,6 +10,7 @@ namespace C7GameData.Save {
 			CanCarryTacticalMissiles,
 			LethalLandBombardment,
 			LethalSeaBombardment,
+			Radar,
 		}
 
 		public string name { get; set; }

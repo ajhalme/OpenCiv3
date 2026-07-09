@@ -2720,7 +2720,8 @@
       ],
       "unproducible": false,
       "flags": [
-        "rotateBeforeAttack"
+        "rotateBeforeAttack",
+        "radar"
       ],
       "categories": [
         "Land"
@@ -3495,7 +3496,8 @@
       ],
       "unproducible": false,
       "flags": [
-        "canCarryAircraft"
+        "canCarryAircraft",
+        "radar"
       ],
       "categories": [
         "Sea"
@@ -3799,6 +3801,9 @@
         "Maya"
       ],
       "unproducible": false,
+      "flags": [
+        "radar"
+      ],
       "categories": [
         "Sea"
       ],
@@ -4513,6 +4518,9 @@
         "Maya"
       ],
       "unproducible": true,
+      "flags": [
+        "radar"
+      ],
       "categories": [
         "Land"
       ],
@@ -7534,6 +7542,9 @@
         "AEGIS Cruiser"
       ],
       "unproducible": false,
+      "flags": [
+        "radar"
+      ],
       "categories": [
         "Sea"
       ],
@@ -11203,7 +11214,8 @@
     "maxInterest": 50,
     "shieldCostPerGold": 4,
     "shieldRateForDisbanding": 0.25,
-    "allowLesserUnitProduction": false
+    "allowLesserUnitProduction": false,
+    "radarTileVisibility": 2
   },
   "timeOptions": {
     "baseUnit": "years",
