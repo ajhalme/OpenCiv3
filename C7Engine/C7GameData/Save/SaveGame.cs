@@ -176,8 +176,7 @@ namespace C7GameData.Save {
 
 		private GameData InitializeGameData() {
 			// copy data without references
-			return new GameData {
-				seed = Seed,
+			var data = new GameData(Seed) {
 				turn = TurnNumber,
 				terrainTypes = TerrainTypes,
 				Resources = Resources,
@@ -196,6 +195,8 @@ namespace C7GameData.Save {
 				timeOptions = TimeOptions,
 				GreatWondersBuilt = GreatWondersBuilt,
 			};
+
+			return data;
 		}
 
 		private void ConvertTerraforms(GameData data) {

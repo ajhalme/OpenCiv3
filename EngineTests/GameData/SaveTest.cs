@@ -497,6 +497,7 @@ public class SaveTests : IClassFixture<SaveGameFixture> {
 			Assert.True(ex == null, name + ":" + ex?.ToString());
 			Assert.NotNull(game);
 			Assert.NotNull(gd);
+			Assert.NotEqual(-1, gd.seed);
 
 			CheckPlayableCivs(name, game);
 			CheckAlliances(name, gd);

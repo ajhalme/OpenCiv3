@@ -78,14 +78,17 @@ namespace C7GameData {
 		// An action called after initialization of EngineStorage
 		internal Action onGameCreation;
 
-		public GameData() {
+		public GameData(int customSeed = -1) {
 			map = new GameMap();
+			seed = customSeed;
+			// this will probably never happen, leaving it as a fallback
 			if (seed == -1) {
+				log.Information("Random seed was not set, generating...");
 				rng = new Random();
 				seed = rng.Next(int.MaxValue);
-				log.Information("Random seed is " + seed);
 			}
 			rng = new Random(seed);
+			log.Information($"Seed is {seed}");
 		}
 
 		// Returns the first human player in the set of players, or the first

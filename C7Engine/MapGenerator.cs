@@ -77,6 +77,7 @@ namespace C7Engine {
 		// The entry point to the overall map generation process.
 		public static GameMap GenerateMap(WorldCharacteristics wc) {
 			if (wc.mapSeed == -1) {
+				log.Information("Random seed is not specified, generating...");
 				wc.mapSeed = new Random().Next(int.MaxValue);
 			}
 			log.Information("Seed: " + wc.mapSeed);
