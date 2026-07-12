@@ -1018,7 +1018,7 @@ namespace C7GameData {
 			if (capital == null) {
 				capital = cities[0];
 			}
-			List<City> citiesInRankOrdering = cities.OrderBy(x => x.location.rankDistanceTo(capital.location)).ToList();
+			List<City> citiesInRankOrdering = cities.OrderBy(x => x.location.RankDistanceTo(capital.location)).ToList();
 			for (int i = 0; i < citiesInRankOrdering.Count; ++i) {
 				citiesInRankOrdering[i].rankIndex = i;
 

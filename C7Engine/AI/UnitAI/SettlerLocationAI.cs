@@ -43,7 +43,7 @@ namespace C7Engine {
 				foreach (Tile workable in t.GetTilesWithinRankDistance(maxRank)) {
 					if (workable == Tile.NONE)
 						continue;
-					var rank = t.rankDistanceTo(workable);
+					var rank = t.RankDistanceTo(workable);
 					if (rank <= 0)
 						continue;
 					var adjustment = Math.Max(0, (maxRank - rank + 1f) / maxRank);
@@ -63,7 +63,7 @@ namespace C7Engine {
 
 				//Lower scores if they are far away
 				float preDistanceScore = score;
-				int distance = startTile.distanceTo(t);
+				int distance = startTile.DistanceTo(t);
 				if (distance > player.civilization.Adjustments.DistancePenaltyRadius) {
 					score += player.civilization.Adjustments.DistancePenalty * distance;
 				}
@@ -84,9 +84,9 @@ namespace C7Engine {
 			if (memo.TryGetValue(key, out var value))
 				return value;
 
-			float score = owner.civilization.Adjustments.FoodYieldBonus * t.foodYield(owner).yield;
-			score += owner.civilization.Adjustments.ProductionYieldBonus * t.productionYield(owner).yield;
-			score += owner.civilization.Adjustments.CommerceYieldBonus * t.commerceYield(owner).yield;
+			float score = owner.civilization.Adjustments.FoodYieldBonus * t.FoodYield(owner).yield;
+			score += owner.civilization.Adjustments.ProductionYieldBonus * t.ProductionYield(owner).yield;
+			score += owner.civilization.Adjustments.CommerceYieldBonus * t.CommerceYield(owner).yield;
 			if (owner.KnowsAboutResource(t.Resource)) {
 				if (t.Resource.Category == ResourceCategory.STRATEGIC) {
 					score += owner.civilization.Adjustments.StrategicResourceBonus;

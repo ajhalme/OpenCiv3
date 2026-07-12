@@ -426,7 +426,7 @@
         "description": "fortress",
         "amount": 0.5
       },
-      "zIndex": 3,
+      "zIndex": 6,
       "movementCost": -1
     },
     {
@@ -436,9 +436,27 @@
         "description": "barricade",
         "amount": 1
       },
-      "zIndex": 3,
+      "zIndex": 6,
       "movementCost": -1,
       "upgradesFrom": "fortress"
+    },
+    {
+      "key": "ruins",
+      "layer": "ruins",
+      "zIndex": 2,
+      "movementCost": -1
+    },
+    {
+      "key": "pollution",
+      "layer": "pollution",
+      "zIndex": 10,
+      "movementCost": -1
+    },
+    {
+      "key": "craters",
+      "layer": "craters",
+      "zIndex": 5,
+      "movementCost": -1
     }
   ],
   "resources": [

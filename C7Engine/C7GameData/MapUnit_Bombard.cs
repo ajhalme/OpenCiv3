@@ -34,7 +34,7 @@ namespace C7GameData {
 		public bool CanBombardTile(Tile tile, out BombardTarget bombardTarget) {
 			bombardTarget = BombardTarget.None;
 
-			if (this.location.distanceTo(tile) > this.unitType.bombardRange)
+			if (this.location.DistanceTo(tile) > this.unitType.bombardRange)
 				return false;
 
 			if (this.unitType.bombard == 0)
@@ -53,7 +53,7 @@ namespace C7GameData {
 
 			// TODO: Consider colony on neutral tile (allies && potential enemies)
 
-			if (tile.HasImprovements) {
+			if (tile.overlays.GetManMadeImprovements().Any()) {
 				if (target == NONE) {
 					if (tile.OwningPlayer() != null && EngineStorage.gameData.AreInLockedPeace(this.owner, tile.OwningPlayer()))
 						return false;
@@ -105,7 +105,7 @@ namespace C7GameData {
 			if (!(hasTargetUnit || hasTileImprovements || hasForeignCity))
 				return; // Nothing to bombard
 
-			facingDirection = location.directionTo(tile);
+			facingDirection = location.DirectionTo(tile);
 
 			if (hasCityWalls)
 				await BombardCityWalls(tile);
@@ -248,7 +248,7 @@ namespace C7GameData {
 
 			var hitCount = 0;
 
-			var improvement = tile.overlays.GetImprovements()
+			var improvement = tile.overlays.GetManMadeImprovements()
 				.OrderBy(x => GameData.rng.Next()).FirstOrDefault();
 
 			// Anecdotal, just by observing the game; I think rate of fire doesn't apply to improvements

@@ -125,7 +125,7 @@ public partial class MapUnit {
 
 	public async Task MoveAlongPath() {
 		while (movementPoints.canMove && path?.PathLength() > 0) {
-			TileDirection dir = location.directionTo(path.Next());
+			TileDirection dir = location.DirectionTo(path.Next());
 			await Move(dir, true); //TODO: don't wait on last move animation?
 		}
 	}
@@ -198,7 +198,7 @@ public partial class MapUnit {
 	/// <returns>True if the unit is alive after the movement, false otherwise</returns>
 	/// <exception cref="Exception"></exception>
 	public async Task<bool> Move(TileDirection dir, bool wait = false) {
-		(int dx, int dy) = dir.toCoordDiff();
+		(int dx, int dy) = dir.ToCoordDiff();
 
 		Tile newLoc = EngineStorage.gameData.map.tileAt(dx + location.XCoordinate, dy + location.YCoordinate);
 
@@ -231,14 +231,14 @@ public partial class MapUnit {
 			if (combatResult == CombatResult.DefenderKilled || combatResult == CombatResult.DefenderRetreated) {
 				this.movementPoints.onUnitMove(1);
 				if (newLoc.FindTopDefender(this) != MapUnit.NONE) {
-					this.facingDirection = this.facingDirection.reversed();
+					this.facingDirection = this.facingDirection.Reversed();
 					return true;
 				}
 
 				// Similarly if we retreated, pay one MP for the combat but don't move.
 			} else if (combatResult == CombatResult.AttackerRetreated) {
 				this.movementPoints.onUnitMove(1);
-				this.facingDirection = this.facingDirection.reversed();
+				this.facingDirection = this.facingDirection.Reversed();
 				return true;
 			}
 		}
@@ -286,8 +286,8 @@ public partial class MapUnit {
 		var attacker = this;
 
 		// Set combat animation facing. We'll restore the defender's original facing direction at the end of the battle.
-		TileDirection attackerAttackDirection = attacker.location.directionTo(defender.location);
-		TileDirection defenderDefenseDirection = attackerAttackDirection.reversed();
+		TileDirection attackerAttackDirection = attacker.location.DirectionTo(defender.location);
+		TileDirection defenderDefenseDirection = attackerAttackDirection.Reversed();
 		var defenderOriginalDirection = defender.facingDirection;
 		attacker.facingDirection = attacker.GetAttackAnimationDirection(attackerAttackDirection);
 		defender.facingDirection = defender.GetAttackAnimationDirection(defenderDefenseDirection);

@@ -247,7 +247,7 @@ namespace C7Engine {
 			Tile closestBarbCamp = Tile.NONE;
 			int closestBarbDistance = int.MaxValue;
 			foreach (Tile t in reachableBarbCampsTiles) {
-				int crowDistance = t.distanceTo(unit.location);
+				int crowDistance = t.DistanceTo(unit.location);
 				if (crowDistance < closestBarbDistance) {
 					closestBarbCamp = t;
 					closestBarbDistance = crowDistance;

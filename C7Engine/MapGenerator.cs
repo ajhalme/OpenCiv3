@@ -1392,7 +1392,7 @@ namespace C7Engine {
 			}
 
 			// No barbarian camps less than 6 tiles away from a player
-			if (m.startingLocations.Any(x => t.distanceTo(x) < 6)) return false;
+			if (m.startingLocations.Any(x => t.DistanceTo(x) < 6)) return false;
 
 			return true;
 		}
@@ -1512,7 +1512,7 @@ namespace C7Engine {
 			}
 
 			foreach (Tile start in startingLocations) {
-				if (start.continent == t.continent && start.distanceTo(t) < minDistance) {
+				if (start.continent == t.continent && start.DistanceTo(t) < minDistance) {
 					return true;
 				}
 			}
@@ -1540,9 +1540,9 @@ namespace C7Engine {
 			// Calculate the score for tiles in the immediate area.
 			int score = 0;
 			foreach (Tile n in t.GetTilesWithinRankDistance(1)) {
-				score += CommercePoints * n.commerceYield(player).yield;
-				score += ShieldPoints * n.productionYield(player).yield;
-				score += FoodPoints * n.foodYield(player).yield;
+				score += CommercePoints * n.CommerceYield(player).yield;
+				score += ShieldPoints * n.ProductionYield(player).yield;
+				score += FoodPoints * n.FoodYield(player).yield;
 				if (n.hasBarbarianCamp) {
 					score += BarbarianCampPoints;
 				}
@@ -1555,9 +1555,9 @@ namespace C7Engine {
 			// Then do it again for the full big fat cross, effectively weighting
 			// the immediate neighbors at a 2x rate.
 			foreach (Tile n in t.GetTilesWithinRankDistance(wc.maxRankOfWorkableTiles)) {
-				score += CommercePoints * n.commerceYield(player).yield;
-				score += ShieldPoints * n.productionYield(player).yield;
-				score += FoodPoints * n.foodYield(player).yield;
+				score += CommercePoints * n.CommerceYield(player).yield;
+				score += ShieldPoints * n.ProductionYield(player).yield;
+				score += FoodPoints * n.FoodYield(player).yield;
 				if (n.hasBarbarianCamp) {
 					score += BarbarianCampPoints;
 				}

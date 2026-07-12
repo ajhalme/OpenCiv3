@@ -228,14 +228,14 @@ public class SaveTests : IClassFixture<SaveGameFixture> {
 		Tile t1 = gd.map.tileAt(99, 33);
 		Tile t2 = gd.map.tileAt(1, 33);
 
-		Assert.Equal(t0.distanceTo(t1), 1);
-		Assert.Equal(t1.distanceTo(t0), 1);
+		Assert.Equal(t0.DistanceTo(t1), 1);
+		Assert.Equal(t1.DistanceTo(t0), 1);
 
-		Assert.Equal(t1.distanceTo(t2), 1);
-		Assert.Equal(t2.distanceTo(t1), 1);
+		Assert.Equal(t1.DistanceTo(t2), 1);
+		Assert.Equal(t2.DistanceTo(t1), 1);
 
-		Assert.Equal(t0.distanceTo(t2), 2);
-		Assert.Equal(t2.distanceTo(t0), 2);
+		Assert.Equal(t0.DistanceTo(t2), 2);
+		Assert.Equal(t2.DistanceTo(t0), 2);
 	}
 
 

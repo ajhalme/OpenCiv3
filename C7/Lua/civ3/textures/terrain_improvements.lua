@@ -1,6 +1,7 @@
 local terrain_improvements = {}
 
 local TERRAIN = "Art/Terrain/"
+local CITIES = "Art/Cities/"
 
 --[[
 TerrainBuildings.pcx contains multiple pieces of art in a grid, with each
@@ -36,5 +37,9 @@ terrain_improvements.irrigation = {
 terrain_improvements.railroad = TERRAIN .. "railroads.pcx"
 
 terrain_improvements.road = TERRAIN .. "roads.pcx"
+
+terrain_improvements.ruins = CITIES .. "DESTROY.PCX"
+terrain_improvements.pollution = TERRAIN .. "pollution.pcx"
+terrain_improvements.craters = TERRAIN .. "craters.pcx"
 
 return terrain_improvements

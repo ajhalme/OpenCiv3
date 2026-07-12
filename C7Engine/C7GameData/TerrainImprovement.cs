@@ -11,6 +11,9 @@ namespace C7GameData {
 			Roads,
 			ResourceDevelopment, // mine, irrigation
 			Holdings, // outpost, radar tower, fortress, barricade
+			Ruins,
+			Pollution,
+			Craters,
 		}
 
 		public readonly string key;

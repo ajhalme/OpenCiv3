@@ -40,6 +40,16 @@ namespace QueryCiv3.Sav {
 		public bool Railroad { get => Util.GetFlag(Flags2[0], 1); }
 		public bool Mine { get => Util.GetFlag(Flags2[0], 2); }
 		public bool Irrigation { get => Util.GetFlag(Flags2[0], 3); }
+		public bool Fortress { get => Util.GetFlag(Flags2[0], 4); }
+		public bool GoodyHut { get => Util.GetFlag(Flags2[0], 5); }
+		public bool Pollution { get => Util.GetFlag(Flags2[0], 6); }
+
+		public bool Craters { get => Util.GetFlag(Flags2[1], 0); }
+
+		public bool Barricade { get => Util.GetFlag(Flags2[3], 4); }
+		public bool Airfield { get => Util.GetFlag(Flags2[3], 5); }
+		public bool RadarTower { get => Util.GetFlag(Flags2[3], 6); }
+		public bool Outpost { get => Util.GetFlag(Flags2[3], 7); }
 
 		public int BaseTerrain { get => Flags2[5] & 0x0f; }
 		public int OverlayTerrain { get => (Flags2[5] & 0xf0) >> 4; }

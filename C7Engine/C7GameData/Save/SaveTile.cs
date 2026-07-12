@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Linq;
 using System.Reflection;
-using System;
 
 namespace C7GameData.Save {
 

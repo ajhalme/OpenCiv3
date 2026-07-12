@@ -7,7 +7,7 @@ using QueryCiv3;
 using QueryCiv3.Biq;
 using C7GameData.Save;
 using System.Reflection;
-using static C7GameData.TileOverlays;
+using static C7GameData.Tile.TileOverlays;
 
 /*
   This will read a Civ3 sav into C7 native format for immediate use or saving to native JSON save
@@ -131,7 +131,16 @@ namespace C7GameData {
 					overlayTerrain = save.TerrainTypes[civ3Tile.OverlayTerrain].Key,
 				};
 				if (civ3Tile.BarbarianCamp >= 0) {
-					tile.features.Add("barbarianCamp");
+					tile.features.Add(BARBARIAN_CAMP);
+				}
+				if (civ3Tile.HasRuins) {
+					tile.overlays.Add(RUINS);
+				}
+				if (civ3Tile.Pollution) {
+					tile.overlays.Add(POLLUTION);
+				}
+				if (civ3Tile.Craters) {
+					tile.overlays.Add(CRATERS);
 				}
 				if (civ3Tile.BonusShield) {
 					tile.features.Add("bonusShield");
@@ -241,7 +250,16 @@ namespace C7GameData {
 					overlayTerrain = save.TerrainTypes[civ3Tile.OverlayTerrain].Key,
 				};
 				if (civ3Tile.BarbarianCamp) {
-					tile.features.Add("barbarianCamp");
+					tile.features.Add(BARBARIAN_CAMP);
+				}
+				if (civ3Tile.Ruin > 0) {
+					tile.overlays.Add(RUINS);
+				}
+				if (civ3Tile.Pollution) {
+					tile.overlays.Add(POLLUTION);
+				}
+				if (civ3Tile.Craters) {
+					tile.overlays.Add(CRATERS);
 				}
 				if (civ3Tile.BonusGrassland) {
 					tile.features.Add("bonusShield");
@@ -1863,27 +1881,27 @@ namespace C7GameData {
 			}
 		}
 
-		private void AddYieldBonusesForTerrainImprovements(string terrainKey, TERR terrainType) {
-			void SetBonus(string improvementKey, Tile.YieldType type, int bonus) {
-				SaveTerrainImprovement improvement = save.TerrainImprovements.Find(ti => ti.key == improvementKey);
+		private void SetBonus(string terrainKey, string improvementKey, Tile.YieldType type, int bonus) {
+			SaveTerrainImprovement improvement = save.TerrainImprovements.Find(ti => ti.key == improvementKey);
 
-				if (!improvement.bonusYields.TryGetValue(terrainKey, out var yieldDict)) {
-					yieldDict = new Dictionary<Tile.YieldType, int>();
-					improvement.bonusYields[terrainKey] = yieldDict;
-				}
-
-				yieldDict[type] = bonus;
+			if (!improvement.bonusYields.TryGetValue(terrainKey, out var yieldDict)) {
+				yieldDict = new Dictionary<Tile.YieldType, int>();
+				improvement.bonusYields[terrainKey] = yieldDict;
 			}
 
+			yieldDict[type] = bonus;
+		}
+
+		private void AddYieldBonusesForTerrainImprovements(string terrainKey, TERR terrainType) {
 			if (terrainType.MiningBonus > 0) {
-				SetBonus(MINE, Tile.YieldType.Production, terrainType.MiningBonus);
+				SetBonus(terrainKey, MINE, Tile.YieldType.Production, terrainType.MiningBonus);
 			}
 			if (terrainType.IrrigationBonus > 0) {
-				SetBonus(IRRIGATION, Tile.YieldType.Food, terrainType.IrrigationBonus);
+				SetBonus(terrainKey, IRRIGATION, Tile.YieldType.Food, terrainType.IrrigationBonus);
 			}
 			if (terrainType.RoadBonus > 0) {
-				SetBonus(ROAD, Tile.YieldType.Commerce, terrainType.RoadBonus);
-				SetBonus(RAILROAD, Tile.YieldType.Commerce, terrainType.RoadBonus);
+				SetBonus(terrainKey, ROAD, Tile.YieldType.Commerce, terrainType.RoadBonus);
+				SetBonus(terrainKey, RAILROAD, Tile.YieldType.Commerce, terrainType.RoadBonus);
 			}
 		}
 

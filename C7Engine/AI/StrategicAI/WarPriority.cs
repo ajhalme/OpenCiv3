@@ -171,7 +171,7 @@ namespace C7GameData.AIData {
 						continue;
 					}
 
-					result = Math.Min(result, ca.location.distanceTo(cb.location));
+					result = Math.Min(result, ca.location.DistanceTo(cb.location));
 				}
 			}
 			return result;
