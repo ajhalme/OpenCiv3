@@ -1,3 +1,4 @@
+using C7Engine;
 using C7Engine.Pathing;
 using C7GameData;
 using C7GameData.Save;
@@ -370,6 +371,7 @@ public sealed class AStarPathFindingWaterUnitTest : MapBase {
 
 	[Fact]
 	private void TestWaterUnitHasToGoAroundLandStrip() {
+		EngineStorage.InitializeGameDataForTests(new C7GameData.GameData(1324));
 		// Tile location here doesn't have a special meaning, I just had a map example to work off of
 		InitilizeStartTile(MakeCoastTile(), new TileLocation(88, 12));
 		var east = AddNeighborsAndUpdateMap(startTile, MakeCoastTile(), TileDirection.EAST);

@@ -82,8 +82,7 @@ public partial class Tile {
 
 			// If there's a change in road coverage, invalidate the cached trade network
 			if (roadCreated || roadRemoved) {
-				// Hack: don't do this if gamedata is null, which can be true in some unit tests.
-				EngineStorage.gameData?.InvalidateCachedTradeNetwork();
+				EngineStorage.gameData.InvalidateCachedTradeNetwork();
 			}
 		}
 

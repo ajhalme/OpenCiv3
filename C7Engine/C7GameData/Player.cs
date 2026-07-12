@@ -393,8 +393,9 @@ namespace C7GameData {
 			return "";
 		}
 
+		[LuaMethod]
 		public List<Tech> GetKnownTechs() {
-			return EngineStorage.gameData?.techs.Where(x => this.knownTechs.Contains(x.id)).ToList();
+			return EngineStorage.gameData.techs.Where(x => this.knownTechs.Contains(x.id)).ToList();
 		}
 
 		public PlayerCommerceBreakdown AggregateFlows() {
