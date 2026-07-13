@@ -46,7 +46,7 @@ namespace C7GameData {
 
 			foreach (Tile tile in path) {
 				// Subtract the cost of the next move.
-				float cost = GetMovementCost(player, from, from.directionTo(tile), tile);
+				float cost = GetMovementCost(player, from, from.DirectionTo(tile), tile);
 				movementPoints.onUnitMove(cost);
 
 				// If we can't do any more moves, bump up the turn cost and reset

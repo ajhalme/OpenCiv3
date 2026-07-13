@@ -47,7 +47,7 @@ namespace QueryCiv3.Biq {
 		public bool GoodyHut { get => Util.GetFlag(C3COverlays[0], 5); }
 		public bool Pollution { get => Util.GetFlag(C3COverlays[0], 6); }
 		public bool BarbarianCamp { get => Util.GetFlag(C3COverlays[0], 7); }
-		public bool Crater { get => Util.GetFlag(C3COverlays[1], 0); }
+		public bool Craters { get => Util.GetFlag(C3COverlays[1], 0); }
 		public bool Barricade { get => Util.GetFlag(C3COverlays[3], 4); }
 		public bool Airfield { get => Util.GetFlag(C3COverlays[3], 5); }
 		public bool RadarTower { get => Util.GetFlag(C3COverlays[3], 6); }

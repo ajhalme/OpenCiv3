@@ -87,7 +87,7 @@ namespace C7Engine.AI.UnitAI {
 				}
 
 				// Penalize cities for being far away.
-				score -= c.location.distanceTo(unit.location);
+				score -= c.location.DistanceTo(unit.location);
 
 				cityScores.Add(c, score);
 			}

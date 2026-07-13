@@ -270,7 +270,7 @@ namespace C7GameData {
 					yield return sb;
 				}
 
-				if ((!role.Bombarding()) && (attackDirection is TileDirection dir) && location.HasRiverCrossing(dir.reversed()))
+				if ((!role.Bombarding()) && (attackDirection is TileDirection dir) && location.HasRiverCrossing(dir.Reversed()))
 					yield return gD.riverCrossingBonus;
 
 				if (location.cityAtTile != null) {
@@ -352,11 +352,11 @@ namespace C7GameData {
 		}
 
 		internal TileDirection GetAttackAnimationDirection(TileDirection attackDirection) {
-			return unitType.rotateBeforeAttack ? attackDirection.rotatedCounterClockwise90Degrees() : attackDirection;
+			return unitType.rotateBeforeAttack ? attackDirection.RotatedCounterClockwise90Degrees() : attackDirection;
 		}
 
 		internal TileDirection GetDefenseAnimationDirection(TileDirection attackDirection) {
-			return GetAttackAnimationDirection(attackDirection.reversed());
+			return GetAttackAnimationDirection(attackDirection.Reversed());
 		}
 
 		public int HealRateAt(Tile location) {
@@ -440,7 +440,7 @@ namespace C7GameData {
 			var cityOwner = tile.cityAtTile?.owner;
 			var hasBarbCamp = tile.hasBarbarianCamp;
 			var isCombatUnit = this.IsCombatUnit();
-			var distanceToTile = this.location.distanceTo(tile);
+			var distanceToTile = this.location.DistanceTo(tile);
 
 			if (isHumanOwner && (hasForeignCity || hasHostileCity || hasForeignUnits || hasHostileUnits) && distanceToTile > 1) {
 				return Intent.Disabled;

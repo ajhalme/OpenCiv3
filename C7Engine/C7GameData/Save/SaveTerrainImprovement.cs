@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using static C7GameData.TileOverlays;
+using static C7GameData.Tile.TileOverlays;
 using Layer = C7GameData.TerrainImprovement.Layer;
 
 namespace C7GameData.Save;
@@ -8,10 +8,22 @@ public class SaveTerrainImprovement {
 	// The following method is used to generate terrain improvement
 	// data when loading a CIV3 SAV or BIQ file
 	public static IEnumerable<SaveTerrainImprovement> Civ3Improvements() {
-		yield return new(IRRIGATION, Layer.ResourceDevelopment, zIndex: 0);
-		yield return new(MINE, Layer.ResourceDevelopment, zIndex: 2);
+		yield return new(
+			IRRIGATION,
+			Layer.ResourceDevelopment,
+			zIndex: 0);
 
-		yield return new(ROAD, Layer.Roads, movementCost: 1.0f / 3, zIndex: 1);
+		yield return new(
+			MINE,
+			Layer.ResourceDevelopment,
+			zIndex: 2);
+
+		yield return new(
+			ROAD,
+			Layer.Roads,
+			movementCost: 1.0f / 3,
+			zIndex: 1);
+
 		yield return new(
 			RAILROAD,
 			Layer.Roads,
@@ -25,14 +37,29 @@ public class SaveTerrainImprovement {
 			FORTRESS,
 			Layer.Holdings,
 			defenseBonus: new(FORTRESS, 0.5),
-			zIndex: 3
+			zIndex: 6
 		);
 		yield return new(
 			BARRICADE,
 			Layer.Holdings,
 			upgradesFrom: FORTRESS,
 			defenseBonus: new(BARRICADE, 1),
-			zIndex: 3
+			zIndex: 6
+		);
+		yield return new(
+			RUINS,
+			Layer.Ruins,
+			zIndex: 2
+		);
+		yield return new(
+			POLLUTION,
+			Layer.Pollution,
+			zIndex: 10
+		);
+		yield return new(
+			CRATERS,
+			Layer.Craters,
+			zIndex: 5
 		);
 
 		// TODO: Add colony, outpost, airfield, radar tower

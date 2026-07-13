@@ -8,6 +8,7 @@ namespace C7.Map {
 	public partial class TileAssignmentLayer : LooseLayer {
 		ImageTexture foodTexture = TextureLoader.Load("icons.food");
 		ImageTexture shieldTexture = TextureLoader.Load("icons.shield");
+		ImageTexture wastedShieldTexture = TextureLoader.Load("icons.wasted_shield");
 		ImageTexture goldTexture = TextureLoader.Load("icons.commerce");
 
 		private const int tileWidth = 128;
@@ -52,9 +53,15 @@ namespace C7.Map {
 				return;
 			}
 
-			Tile.Yield food = tile.foodYield(city);
-			Tile.Yield shields = tile.productionYield(city);
-			Tile.Yield gold = tile.commerceYield(city);
+			if (tile.HasPollution()) {
+				looseView.DrawTexture(wastedShieldTexture,
+					tileCenter + new Vector2(-wastedShieldTexture.GetSize().X / 2, -15));
+				return;
+			}
+
+			Tile.Yield food = tile.FoodYield(city);
+			Tile.Yield shields = tile.ProductionYield(city);
+			Tile.Yield gold = tile.CommerceYield(city);
 
 			int totalWidth = ((food.penalty + food.yield) * foodTexture.GetWidth()) +
 						((shields.penalty + shields.yield) * shieldTexture.GetWidth()) +

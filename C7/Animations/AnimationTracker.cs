@@ -115,7 +115,7 @@ public partial class AnimationTracker {
 
 			float offsetX = 0, offsetY = 0;
 			if (action == MapUnit.AnimatedAction.RUN) {
-				(int dX, int dY) = unit.facingDirection.toCoordDiff();
+				(int dX, int dY) = unit.facingDirection.ToCoordDiff();
 				offsetX = -1 * dX * (1f - progress);
 				offsetY = -1 * dY * (1f - progress);
 			}

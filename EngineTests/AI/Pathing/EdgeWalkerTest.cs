@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using C7Engine;
 using C7Engine.Pathing;
 using C7GameData;
 using C7GameData.Save;
@@ -93,6 +94,7 @@ namespace EngineTests.AI.Pathing {
 
 		[Fact]
 		private void TestRoadOnDestinationNotOnStart() {
+			EngineStorage.InitializeGameDataForTests(new C7GameData.GameData(1234));
 			InitilizeStartTile(MakeHillTile(), new TileLocation(50, 50));
 
 			// Set up a neighbor with a road.

@@ -114,9 +114,9 @@ public partial class TileInfoPopup : Popup {
 			terrainLabel.Text = tile.baseTerrainType?.DisplayName ?? "";
 			overlayLabel.Text = tile.overlayTerrainType?.DisplayName ?? "";
 			resourceLabel.Text = tile.Resource?.Name ?? "";
-			foodLabel.Text = $"Food: {tile.foodYield(player).baseYield}";
-			shieldLabel.Text = $"Shields: {tile.productionYield(player).baseYield}";
-			goldLabel.Text = $"Gold: {tile.commerceYield(player).baseYield}";
+			foodLabel.Text = $"Food: {tile.FoodYield(player).baseYield}";
+			shieldLabel.Text = $"Shields: {tile.ProductionYield(player).baseYield}";
+			goldLabel.Text = $"Gold: {tile.CommerceYield(player).baseYield}";
 
 			if (tile.baseTerrainType == tile.overlayTerrainType)
 				overlayLabel.Text = "";

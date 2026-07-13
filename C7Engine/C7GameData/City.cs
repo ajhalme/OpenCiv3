@@ -498,17 +498,17 @@ namespace C7GameData {
 		}
 
 		public int CurrentFoodYield() {
-			int yield = location.foodYield(this).yield;
+			int yield = location.FoodYield(this).yield;
 			foreach (CityResident r in residents) {
-				yield += r.tileWorked.foodYield(this).yield;
+				yield += r.tileWorked.FoodYield(this).yield;
 			}
 			return yield;
 		}
 
 		public CorruptableValue CurrentProductionYield() {
-			int yield = location.productionYield(this).yield;
+			int yield = location.ProductionYield(this).yield;
 			foreach (CityResident r in residents) {
-				yield += r.tileWorked.productionYield(this).yield;
+				yield += r.tileWorked.ProductionYield(this).yield;
 			}
 			CorruptableValue result = new(yield, corruption);
 
@@ -531,9 +531,9 @@ namespace C7GameData {
 		}
 
 		public CommerceBreakdown CurrentCommerceYieldRaw(bool respectCivilDisorder = true) {
-			int uncorruptedCommerce = location.commerceYield(this).yield;
+			int uncorruptedCommerce = location.CommerceYield(this).yield;
 			foreach (CityResident r in residents) {
-				uncorruptedCommerce += r.tileWorked.commerceYield(this).yield;
+				uncorruptedCommerce += r.tileWorked.CommerceYield(this).yield;
 			}
 
 			// Using our value of corruption, figure out how much useful
@@ -766,7 +766,7 @@ namespace C7GameData {
 			foreach (Tile t in location.GetTilesWithinRankDistance(rank)) {
 				// Law II
 				// Ocean tiles may only hold claims of rank 2.
-				if (t.baseTerrainType.Key == "ocean" && t.rankDistanceTo(location) > 2) {
+				if (t.baseTerrainType.Key == "ocean" && t.RankDistanceTo(location) > 2) {
 					continue;
 				}
 				result.Add(t);
@@ -778,7 +778,7 @@ namespace C7GameData {
 		private float CalculateDistanceCorruption(int numAntiCorruptionBuildings) {
 			float maxD = (location.map.numTilesWide + location.map.numTilesTall) / 4;
 
-			float distanceToPalace = owner.citiesWithCorruptionWonders.Min(x => location.rankDistanceTo(x.location));
+			float distanceToPalace = owner.citiesWithCorruptionWonders.Min(x => location.RankDistanceTo(x.location));
 			if (owner.government.corruptionType == Government.CorruptionType.Communal) {
 				distanceToPalace = maxD / 4;
 			}

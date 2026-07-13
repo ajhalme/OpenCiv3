@@ -393,8 +393,9 @@ namespace C7GameData {
 			return "";
 		}
 
+		[LuaMethod]
 		public List<Tech> GetKnownTechs() {
-			return EngineStorage.gameData?.techs.Where(x => this.knownTechs.Contains(x.id)).ToList();
+			return EngineStorage.gameData.techs.Where(x => this.knownTechs.Contains(x.id)).ToList();
 		}
 
 		public PlayerCommerceBreakdown AggregateFlows() {
@@ -1018,7 +1019,7 @@ namespace C7GameData {
 			if (capital == null) {
 				capital = cities[0];
 			}
-			List<City> citiesInRankOrdering = cities.OrderBy(x => x.location.rankDistanceTo(capital.location)).ToList();
+			List<City> citiesInRankOrdering = cities.OrderBy(x => x.location.RankDistanceTo(capital.location)).ToList();
 			for (int i = 0; i < citiesInRankOrdering.Count; ++i) {
 				citiesInRankOrdering[i].rankIndex = i;
 

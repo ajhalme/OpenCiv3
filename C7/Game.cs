@@ -1172,7 +1172,7 @@ public partial class Game : Node {
 				// If we couldn't path onto the tile, but the tile is next to us and
 				// we could enter the tile if combat is allowed (or if we could
 				// declare war with the move) mark the path.
-				var distanceToTile = unit.location.distanceTo(tile);
+				var distanceToTile = unit.location.DistanceTo(tile);
 				var canEnterForcefully = unit.CanEnterForcefully(tile, out Intent intent);
 				result.intent = intent;
 

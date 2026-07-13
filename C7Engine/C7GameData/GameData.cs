@@ -199,7 +199,7 @@ namespace C7GameData {
 			if (!ResolveTileOwnershipConflict(a.owningCity, b.owningCity, t, out City winnerCity)) return;
 
 			// Law II
-			if (t.baseTerrainType.Key == "ocean" && t.rankDistanceTo(winnerCity.location) > 2) {
+			if (t.baseTerrainType.Key == "ocean" && t.RankDistanceTo(winnerCity.location) > 2) {
 				t.owningCity = null;
 				return;
 			}
@@ -377,8 +377,8 @@ namespace C7GameData {
 			owner = null;
 			if (a.Equals(b)) { owner = a; return true; }
 
-			int aRank = a.location.rankDistanceTo(t);
-			int bRank = b.location.rankDistanceTo(t);
+			int aRank = a.location.RankDistanceTo(t);
+			int bRank = b.location.RankDistanceTo(t);
 
 			// Law I
 			// Cities can claim tiles of rank n+1, where n is the city's expansion level

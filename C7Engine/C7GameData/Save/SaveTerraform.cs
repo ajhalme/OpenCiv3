@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using C7Engine;
-using static C7GameData.TileOverlays;
+using static C7GameData.Tile.TileOverlays;
 
 namespace C7GameData.Save;
 

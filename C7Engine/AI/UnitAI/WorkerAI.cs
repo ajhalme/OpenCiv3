@@ -127,7 +127,7 @@ namespace C7Engine {
 		// unimproved tile.
 		private static WorkerAIData? GetPlanToImproveNearestUnimproved(MapUnit unit, Player player, List<Tile> tiles) {
 			List<Tile> nearestTiles =
-				tiles.OrderBy(x => x.distanceTo(unit.location))
+				tiles.OrderBy(x => x.DistanceTo(unit.location))
 					.ThenByDescending(x => CityTileAssignmentAI.CalculateTileYieldScore(x, 2, player))
 					.ToList();
 			foreach (Tile t in nearestTiles) {

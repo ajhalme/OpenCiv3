@@ -11,6 +11,9 @@ namespace C7GameData {
 			Roads,
 			ResourceDevelopment, // mine, irrigation
 			Holdings, // outpost, radar tower, fortress, barricade
+			Ruins,
+			Pollution,
+			Craters,
 		}
 
 		public readonly string key;
@@ -95,7 +98,7 @@ namespace C7GameData {
 		}
 
 		public static Terraform? ToTerraform(string improvement) {
-			return EngineStorage.gameData?.Terraforms.FirstOrDefault(tf => tf.Improvement.key.ToLower() == improvement.ToLower());
+			return EngineStorage.gameData.Terraforms.FirstOrDefault(tf => tf.Improvement.key.ToLower() == improvement.ToLower());
 		}
 	}
 }

@@ -119,7 +119,7 @@ namespace C7Engine.AI.UnitAI {
 			foreach (Tile t in player.tileKnowledge.knownTiles) {
 				// Barbarians don't have unified knowledge across their "empire",
 				// only local knowledge.
-				if (player.isBarbarians && t.distanceTo(unit.location) > 4) {
+				if (player.isBarbarians && t.DistanceTo(unit.location) > 4) {
 					continue;
 				}
 
@@ -214,7 +214,7 @@ namespace C7Engine.AI.UnitAI {
 			}
 
 			// Prefer to attack nearer targets.
-			score -= (float)Math.Pow(t.distanceTo(unit.location), 2);
+			score -= (float)Math.Pow(t.DistanceTo(unit.location), 2);
 
 			return score;
 		}

@@ -63,7 +63,7 @@ namespace C7Engine {
 		private static int DistanceToNearestCity(Player player, Tile t) {
 			int result = int.MaxValue;
 			foreach (City c in player.cities) {
-				int distance = t.distanceTo(c.location);
+				int distance = t.DistanceTo(c.location);
 				if (distance < result) {
 					result = distance;
 				}
@@ -74,7 +74,7 @@ namespace C7Engine {
 		private static int DistanceToNearestExplorationTarget(Player player, Tile t) {
 			int result = int.MaxValue;
 			foreach (Tile target in player.tileKnowledge.aiExplorationTargets) {
-				int distance = t.distanceTo(target);
+				int distance = t.DistanceTo(target);
 				if (distance < result) {
 					result = distance;
 				}
@@ -111,7 +111,7 @@ namespace C7Engine {
 				// Similarly with tiles that are far away from us. We use
 				// distanceTo as a quick heuristic to avoid expensive
 				// pathfinding.
-				score -= unit.location.distanceTo(t);
+				score -= unit.location.DistanceTo(t);
 
 				// Finally, reward tiles that are far away from tiles already
 				// being explored by other explorers to encourage exploring in

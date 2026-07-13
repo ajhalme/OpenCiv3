@@ -20,10 +20,10 @@ namespace C7Engine.Pathing {
 					// to point the search in the proper direction, and since it is 
 					// still an underestimate in most cases, it works properly.
 					if (unit.IsLandUnit()) {
-						return from.distanceTo(to) / 100.0;
+						return from.DistanceTo(to) / 100.0;
 					}
 
-					return from.distanceTo(to);
+					return from.DistanceTo(to);
 				},
 				(Tile neighbor, Tile destination) => {
 					return neighbor == destination ? unit.CanEnterForcefully(neighbor) : unit.CanEnterPeacefully(neighbor);
