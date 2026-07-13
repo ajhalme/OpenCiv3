@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using C7Engine;
-using Godot;
 using C7Engine.PalaceMinigame;
+using Godot;
 
 [Tool]
-public partial class PalaceScreen : Civ3TextureRect {
+public partial class PalaceBuildingsLayer : TextureRect {
 	[Export] HBoxContainer switchButtonContainer;
 	ButtonGroup switchButtonGroup = new();
 
 	string activeCulture;
-	List<Building> assignedBuildings = [];
-	Building pendingBuilding;
-
 	Dictionary<string, Culture> cultures = [];
+
+	Building pendingBuilding;
+	List<Building> assignedBuildings = [];
 
 	public override void _Ready() {
 		base._Ready();
@@ -22,15 +22,39 @@ public partial class PalaceScreen : Civ3TextureRect {
 			return;
 		}
 
-		string configPath = Util.Civ3MediaPath("Text/PalaceView.txt");
-		ConfigParser parser = new();
+		MouseFilter = MouseFilterEnum.Stop;
+		SetAnchorsPreset(LayoutPreset.FullRect);
 
-		cultures = parser.Parse(configPath);
+		cultures = ParsePalaceView();
 		activeCulture = cultures.Keys.First();
 
 		foreach (Culture culture in cultures.Values) {
 			AddSwitchButton(culture);
 		}
+
+		switchButtonContainer.GetChild<TextureButton>(0).ButtonPressed = true;
+	}
+
+	private Dictionary<string, Culture> ParsePalaceView() {
+		string configPath = Util.Civ3MediaPath("Text/PalaceView.txt");
+		ConfigParser parser = new();
+
+		return parser.Parse(configPath);
+	}
+
+	private void AddSwitchButton(Culture culture) {
+		var bt = culture.ButtonTextures;
+
+		TextureButton button = new() {
+			TextureNormal = TextureLoader.LoadByPath(bt.Normal),
+			TexturePressed = TextureLoader.LoadByPath(bt.Pressed),
+			TextureHover = TextureLoader.LoadByPath(bt.Hover),
+			ButtonGroup = switchButtonGroup,
+			ToggleMode = true,
+		};
+		button.Pressed += () => ActivateCulture(culture);
+
+		switchButtonContainer.AddChild(button);
 	}
 
 	public override void _Process(double delta) {
@@ -48,6 +72,19 @@ public partial class PalaceScreen : Civ3TextureRect {
 			ImageTexture texture = TextureLoader.LoadByPath(pendingBuilding.TexturePath);
 			DrawTexture(texture, new Vector2(pendingBuilding.X, pendingBuilding.Y), new Color(1, 1, 1, 0.45f));
 		}
+
+		DrawFrame();
+	}
+
+	private void DrawFrame() {
+		var size = Size;
+
+		// Outer black border
+		DrawRect(new Rect2(Vector2.Zero, size), Colors.Black, false, 1f);
+
+		// Inner white border, inset by 1px
+		var inset = new Rect2(Vector2.One, size - new Vector2(2, 2));
+		DrawRect(inset, Colors.White, false, 1f);
 	}
 
 	public override void _GuiInput(InputEvent @event) {
@@ -80,24 +117,11 @@ public partial class PalaceScreen : Civ3TextureRect {
 		var assignedIndexes = assignedBuildings.Select(b=> b.Index);
 
 		return cultures[activeCulture].Buildings
-				.Where(b => !assignedIndexes.Contains(b.Index))
-				.Where(b => b.Prerequisites.All(index => assignedIndexes.Contains(index)));
+			.Where(b => !assignedIndexes.Contains(b.Index))
+			.Where(b => b.Prerequisites.All(index => assignedIndexes.Contains(index)));
 	}
 
-	private void AddSwitchButton(Culture culture) {
-		var bt = culture.ButtonTextures;
-
-		TextureButton button = new() {
-			TextureNormal = TextureLoader.LoadByPath(bt.Normal),
-			TexturePressed = TextureLoader.LoadByPath(bt.Pressed),
-			TextureHover = TextureLoader.LoadByPath(bt.Hover),
-			ButtonGroup = switchButtonGroup,
-			ToggleMode = true,
-		};
-		button.Pressed += () => { activeCulture = culture.Name; };
-
-		if (culture.Name == activeCulture) button.ButtonPressed = true;
-
-		switchButtonContainer.AddChild(button);
+	public void ActivateCulture(Culture culture) {
+		activeCulture = culture.Name;
 	}
 }

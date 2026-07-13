@@ -23,6 +23,11 @@ public partial class Advisors : CenterContainer {
 		Hide();
 	}
 
+	private void OnShowGameView(string gameView) {
+		HideAdvisors();
+		Hide();
+	}
+
 	private void ShowLatestAdvisor() {
 		OnShowSpecificAdvisor(latest);
 	}

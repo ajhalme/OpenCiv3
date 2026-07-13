@@ -90,6 +90,7 @@ public partial class Game : Node {
 
 	[Signal] public delegate void TurnEndedEventHandler();
 	[Signal] public delegate void ShowSpecificAdvisorEventHandler();
+	[Signal] public delegate void ShowGameViewEventHandler();
 	[Signal] public delegate void ShowCityScreenEventHandler();
 
 	[Signal] public delegate void PlayerTurnStartEventHandler();
@@ -110,9 +111,9 @@ public partial class Game : Node {
 	[Export]
 	private Advisors advisor;
 	[Export]
-	private Diplomacy diplomacy;
+	private GameViews gameViews;
 	[Export]
-	private Control palaceScene;
+	private Diplomacy diplomacy;
 
 	[Export]
 	private DoubleClickHandler doubleClickHandler;
@@ -528,8 +529,8 @@ public partial class Game : Node {
 	}
 
 	public override void _UnhandledInput(InputEvent @event) {
-		// Don't handle mouse actions if UI elements are visible, or it's the AI's turn
-		if (popupOverlay.Visible || cityScreen.Visible || diplomacy.Visible || palaceScene.Visible || CurrentState == GameState.ComputerTurn) {
+		// Don't handle if there's an open modal, or if it's the AI's turn
+		if ((HasVisibleModal() && !IsModalSwitchEvent(@event)) || CurrentState == GameState.ComputerTurn) {
 			IsMovingCamera = false;
 			return;
 		}
@@ -748,6 +749,7 @@ public partial class Game : Node {
 		if (eventKeyDown.Keycode == Godot.Key.O && eventKeyDown.ShiftPressed && eventKeyDown.IsCommandOrControlPressed() && eventKeyDown.AltPressed) {
 			ToggleObserverMode();
 		}
+
 		if (eventKeyDown.Keycode == Godot.Key.F1) {
 			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowDomesticAdvisor);
 		}
@@ -766,9 +768,23 @@ public partial class Game : Node {
 		if (eventKeyDown.Keycode == Godot.Key.F6) {
 			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowScienceAdvisor);
 		}
-		if (eventKeyDown.Keycode == Godot.Key.F9) {
-			palaceScene.Show();
+
+		if (eventKeyDown.Keycode == Godot.Key.F7) {
+			EmitSignal(SignalName.ShowGameView, C7Action.ShowWondersView);
 		}
+		if (eventKeyDown.Keycode == Godot.Key.F8) {
+			EmitSignal(SignalName.ShowGameView, C7Action.ShowVictoryStatusView);
+		}
+		if (eventKeyDown.Keycode == Godot.Key.F9) {
+			EmitSignal(SignalName.ShowGameView, C7Action.ShowPalaceView);
+		}
+		if (eventKeyDown.Keycode == Godot.Key.F10) {
+			EmitSignal(SignalName.ShowGameView, C7Action.ShowSpaceRaceView);
+		}
+		if (eventKeyDown.Keycode == Godot.Key.F11) {
+			EmitSignal(SignalName.ShowGameView, C7Action.ShowDemographicsView);
+		}
+
 		if (eventKeyDown.Keycode == Godot.Key.C && HasCurrentlySelectedUnit()) {
 			mapView.centerCameraOnTile(CurrentlySelectedUnit.location);
 		}
@@ -868,6 +884,24 @@ public partial class Game : Node {
 		}
 	}
 
+	private bool HasVisibleModal() {
+		if (popupOverlay.Visible || cityScreen.Visible || diplomacy.Visible)
+			return true;
+
+		if (advisor.Visible || gameViews.Visible)
+			return true;
+
+		return false;
+	}
+
+	private bool IsModalSwitchEvent(InputEvent @event) {
+		if (@event is InputEventKey eventKeyDown && eventKeyDown.Pressed) {
+			return eventKeyDown.Keycode is >= Key.F1 and <= Key.F11;
+		}
+
+		return false;
+	}
+
 	private void ProcessAction(string currentAction) {
 		if (currentAction == C7Action.Escape && tileInfo != null) {
 			HideTileInfo();
@@ -884,13 +918,13 @@ public partial class Game : Node {
 			return;
 		}
 
-		if (currentAction == C7Action.Escape && palaceScene.Visible) {
-			palaceScene.Hide();
+		if (currentAction == C7Action.Escape && advisor.Visible) {
+			advisor.Hide();
 			return;
 		}
 
-		if (currentAction == C7Action.Escape && advisor.Visible) {
-			advisor.Hide();
+		if (currentAction == C7Action.Escape && gameViews.Visible) {
+			gameViews.Hide();
 			return;
 		}
 
@@ -905,7 +939,7 @@ public partial class Game : Node {
 		}
 
 		// never poll for actions if UI elements are visible
-		if (popupOverlay.Visible || cityScreen.Visible || advisor.Visible || diplomacy.Visible || palaceScene.Visible) {
+		if (HasVisibleModal()) {
 			return;
 		}
 
