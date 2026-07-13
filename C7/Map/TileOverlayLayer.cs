@@ -53,11 +53,10 @@ namespace C7.Map {
 
 			var improvements = tile.overlays.GetImprovements();
 
-			foreach (TerrainImprovement ti in improvements
-						 .OrderBy(ti => ti.zIndex)) {
+			foreach (TerrainImprovement ti in improvements.OrderBy(ti => ti.zIndex)) {
 				switch (ti.key) {
 					case IRRIGATION:
-						DrawIrrigaton(looseView, tile, screenTarget);
+						DrawIrrigation(looseView, tile, screenTarget);
 						break;
 					case ROAD:
 						DrawRoad(looseView, tile, screenTarget);
@@ -81,7 +80,7 @@ namespace C7.Map {
 			}
 		}
 
-		private void DrawIrrigaton(LooseView looseView, Tile tile, Rect2 screenTarget) {
+		private void DrawIrrigation(LooseView looseView, Tile tile, Rect2 screenTarget) {
 			// Figure out which index into the irrigation texture to use for
 			// this tile.
 			int irrigationIndex = 0;
