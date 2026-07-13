@@ -45,29 +45,43 @@ namespace C7Engine {
 			return newCity;
 		}
 
+		public static void DestroyCity(City city) {
+			DestroyCity(city.location.XCoordinate, city.location.YCoordinate);
+		}
+		public static void DestroyCity(Tile tile) {
+			DestroyCity(tile.XCoordinate, tile.YCoordinate);
+		}
+
 		public static void DestroyCity(int X, int Y) {
-			Tile tile = EngineStorage.gameData.map.tileAt(X, Y);
+			GameData gameData = EngineStorage.gameData;
+			Tile tile = gameData.map.tileAt(X, Y);
 			Player owner = tile.cityAtTile.owner;
+
+			// TODO: this will get removed eventually, since we will be capturing non-combat units,
+			// plus, it doesn't what it says, if the city is abandoned for example, ALL units are removed.
+			// I am leaving it as it is for the moment.
 			tile.DisbandNonDefendingUnits(owner);
+
 			tile.cityAtTile.RemoveAllCitizens();
 			tile.cityAtTile.owner.cities.Remove(tile.cityAtTile);
-			EngineStorage.gameData.cities.Remove(tile.cityAtTile);
-			EngineStorage.gameData.UpdateTileOwnersOnCityDestruction(tile.cityAtTile);
+
+			gameData.cities.Remove(tile.cityAtTile);
+			gameData.UpdateTileOwnersOnCityDestruction(tile.cityAtTile);
+
 			new MsgCityDestroyed(tile.cityAtTile).send();
-			if (EngineStorage.gameData.CheckForCivDestruction(tile.cityAtTile.owner)) {
-				// Let the UI know about the civ destruction.
-				new MsgCivilizationDestroyed(tile.cityAtTile.owner.civilization).send();
-			}
+
+			gameData.CheckForCivDestructionAndNotifyUi(owner);
+
 			tile.cityAtTile = null;
 
 			// Now that the city has been destroyed and tile owners updated,
 			// invalidate the trade network in case removing this city cut off
 			// resource access.
-			EngineStorage.gameData.InvalidateCachedTradeNetwork();
+			gameData.InvalidateCachedTradeNetwork();
 
 			// Redo corruption calculations after a city is destroyed, since it
 			// may change rank corruption values.
-			owner.DoCorruptionCalculations(EngineStorage.gameData);
+			owner.DoCorruptionCalculations(gameData);
 		}
 	}
 }

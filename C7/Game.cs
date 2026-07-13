@@ -390,6 +390,17 @@ public partial class Game : Node {
 				// UnitMoved is enough to refresh UI
 				EmitSignal(SignalName.UnitMoved, new ParameterWrapper<MapUnit>(mTU.Unit));
 				break;
+			case MsgDisplayAbandonCityPopup mDACP:
+				popupOverlay.ShowPopup(
+					new ConfirmationPopup(
+						$"Are you sure you want to abandon {mDACP.city.name}?",
+						"Yes, we don't want it anymore.",
+						"No, sorry.",
+						() => {
+							CityInteractions.DestroyCity(mDACP.city);
+						}),
+					PopupOverlay.PopupCategory.Advisor);
+				break;
 		}
 	}
 
