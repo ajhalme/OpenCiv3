@@ -3,6 +3,7 @@ local ROOT = "Art/"
 local ADVISORS = "Art/Advisors/"
 
 local BUTTONS = "Art/buttonsFINAL.pcx"
+local CHECKBOXES = "Art/3checkboxes-USE.pcx"
 local EXIT_BOX = "Art/exitBox-backgroundStates.pcx"
 local INTERFACE = "Art/interface/"
 local X_O = "Art/X-o_ALLstates-sprite.pcx"
@@ -65,7 +66,10 @@ textures.advisors = {
     background = ADVISORS .. "military.pcx",
   },
   domestic = {
-    background = ADVISORS .. "domestic.pcx",
+    background = {
+      path = ADVISORS .. "domestic.pcx",
+      shadows = false,
+    },
     button = {
       normal = {
         path = ADVISORS .. "domesticBUTTON.pcx",
@@ -78,6 +82,40 @@ textures.advisors = {
       pressed = {
         path = ADVISORS .. "domesticBUTTON.pcx",
         crop_region = { 1, 52, 145, 24 },
+      },
+    },
+    minus = {
+      normal = {
+        path = ADVISORS .. "domestic_plusminus.pcx",
+        crop_region = { 0, 0, 13, 9 },
+        shadows = false,
+      },
+      hover = {
+        path = ADVISORS .. "domestic_plusminus.pcx",
+        crop_region = { 12, 0, 13, 9 },
+        shadows = false,
+      },
+      pressed = {
+        path = ADVISORS .. "domestic_plusminus.pcx",
+        crop_region = { 24, 0, 13, 9 },
+        shadows = false,
+      },
+    },
+    plus = {
+      normal = {
+        path = ADVISORS .. "domestic_plusminus.pcx",
+        crop_region = { 0, 8, 13, 14 },
+        shadows = false,
+      },
+      hover = {
+        path = ADVISORS .. "domestic_plusminus.pcx",
+        crop_region = { 12, 8, 13, 14 },
+        shadows = false,
+      },
+      pressed = {
+        path = ADVISORS .. "domestic_plusminus.pcx",
+        crop_region = { 24, 8, 13, 14 },
+        shadows = false,
       },
     },
   },
@@ -145,6 +183,23 @@ textures.ui = {
     pressed = {
       path = BUTTONS,
       crop_region = { 43, 1, 20, 20 },
+      shadows = false,
+    },
+  },
+  checkbox = {
+    inactive = {
+      path = CHECKBOXES,
+      crop_region = { 1, 1, 15, 15 },
+      shadows = false,
+    },
+    hover = {
+      path = CHECKBOXES,
+      crop_region = { 17, 1, 15, 15 },
+      shadows = false,
+    },
+    pressed = {
+      path = CHECKBOXES,
+      crop_region = { 33, 1, 15, 15 },
       shadows = false,
     },
   },
@@ -228,6 +283,7 @@ textures.icons = {
   science = {
     path = CITY_SCREEN_ICONS,
     crop_region = { 34, 2, 30, 30 },
+    shadows = false,
   },
   beaker = {
     path = CITY_SCREEN_ICONS,
@@ -284,6 +340,7 @@ textures.icons = {
   luxury = {
     path = CITY_SCREEN_ICONS,
     crop_region = { 376, 2, 30, 30 },
+    shadows = false,
   },
   happy_face = {
 	  path = CITY_SCREEN_ICONS,
@@ -320,10 +377,12 @@ textures.icons = {
   plus = {
     path = ADVISORS .. "domestic_icons_aux.pcx",
     crop_region = { 75, 1, 22, 22 },
+    shadows = false,
   },
   minus = {
     path = ADVISORS .. "domestic_icons_aux.pcx",
     crop_region = { 51, 1, 22, 22 },
+    shadows = false,
   },
   maintenance = {
     path = ADVISORS .. "domestic_icons_aux.pcx",

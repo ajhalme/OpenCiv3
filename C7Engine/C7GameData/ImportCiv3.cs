@@ -617,6 +617,7 @@ namespace C7GameData {
 				player.inAnarchyUntilTurn = save.TurnNumber + leader.AnarchyTurnsLeft;
 				player.primaryColorIndex = leader.Color;
 
+				player.defeated = !player.isBarbarian && leader.CapitalCity < 0;
 				save.Players.Add(player);
 				i++;
 			}

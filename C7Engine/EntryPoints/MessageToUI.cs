@@ -167,4 +167,11 @@ namespace C7Engine {
 			this.Unit = unit;
 		}
 	}
+
+	public class MsgDisplayAbandonCityPopup : MessageToUI {
+		public City city;
+		public MsgDisplayAbandonCityPopup(City city) {
+			this.city = city;
+		}
+	}
 }

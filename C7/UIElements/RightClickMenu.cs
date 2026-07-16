@@ -235,7 +235,15 @@ public partial class RightClickTileMenu : RightClickMenu {
 			// TODO: Set Rally Point
 			// TODO: Set Continental Rally Point
 			// TODO: Clear Continental Rally Point
-			// TODO: Abandon City
+
+			AddItem("Abandon City", () => {
+				this.CloseAndDelete();
+				EngineStorage.ReadGameData((GameData gameData) => {
+					// TODO: perhaps add some conditions as to when we are able to do that,
+					// and if not add a popup message to explain why not (eg last city)
+					new MsgDisplayAbandonCityPopup(tile.cityAtTile).send();
+				});
+			});
 
 			// AddTreeSeparator();
 			// TODO: Wikipedia links
@@ -358,6 +366,14 @@ public partial class RightClickCityMenu : RightClickMenu {
 				EngineStorage.ReadGameData((GameData gameData) => {
 					City.HurryProductionDetails details = tile.cityAtTile.GetHurryProductionDetails();
 					new MsgDisplayHurryProductionPopup(tile.cityAtTile, details).send();
+				});
+			});
+			AddItem("Abandon City", () => {
+				this.CloseAndDelete();
+				EngineStorage.ReadGameData((GameData gameData) => {
+					// TODO: perhaps add some conditions as to when we are able to do that,
+					// and if not add a popup message to explain why not (eg last city)
+					new MsgDisplayAbandonCityPopup(tile.cityAtTile).send();
 				});
 			});
 		}

@@ -56,7 +56,7 @@ public partial class MapUnit {
 					new MsgShowMilitaryAdvisorPopup($"Barbarians have stolen {goldTaken} gold from our cities!\nWe need a stronger military.", happy: false).send();
 				}
 			} else {
-				CityInteractions.DestroyCity(tile.XCoordinate, tile.YCoordinate);
+				CityInteractions.DestroyCity(tile);
 			}
 		}
 

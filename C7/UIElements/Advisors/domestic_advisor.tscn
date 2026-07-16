@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://da7hbbufyfllg"]
+[gd_scene load_steps=8 format=3 uid="uid://da7hbbufyfllg"]
 
 [ext_resource type="Script" uid="uid://ch2d6f1o1sxh2" path="res://UIElements/Advisors/DomesticAdvisor.cs" id="1"]
 [ext_resource type="Script" uid="uid://doqipc4rnaotx" path="res://UIElements/Civ3TextureRect.cs" id="2"]
 [ext_resource type="Script" uid="uid://dcrdcjop64t6t" path="res://UIElements/Civ3TextureButton.cs" id="3"]
+[ext_resource type="Script" uid="uid://clv4mgavtlrul" path="res://UIElements/Civ3HSlider.cs" id="4_gltop"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_0b8py"]
 font_size = 13
@@ -15,12 +16,13 @@ font_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5hkgh"]
 
-[node name="DomesticAdvisor" type="CenterContainer" node_paths=PackedStringArray("background", "close", "changeGovernment", "governmentLabel", "scienceStatus", "treasury", "incomeDetails", "expenseDetails", "incomeSummary", "expenseSummary", "sumSummary", "growth", "cityListContainer", "eatenFood", "fullFood", "wastedShield", "goodShield", "wastedGold", "goodGold", "happyFace", "contentFace", "beaker", "treasuryIcon")]
+[node name="DomesticAdvisor" type="CenterContainer" node_paths=PackedStringArray("background", "close", "changeGovernment", "governmentLabel", "scienceStatus", "treasury", "incomeDetails", "expenseDetails", "incomeSummary", "expenseSummary", "sumSummary", "growth", "cityListContainer", "eatenFood", "fullFood", "wastedShield", "goodShield", "wastedGold", "goodGold", "happyFace", "contentFace", "beaker", "treasuryIcon", "scienceSlider", "luxurySlider")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 0
 script = ExtResource("1")
 background = NodePath("Background")
 close = NodePath("Background/Close")
@@ -45,6 +47,8 @@ happyFace = NodePath("Background/HappyFace")
 contentFace = NodePath("Background/ContentFace")
 beaker = NodePath("Background/Beaker")
 treasuryIcon = NodePath("Background/TreasuryIcon")
+scienceSlider = NodePath("Background/ScienceSlider")
+luxurySlider = NodePath("Background/LuxurySlider")
 
 [node name="Background" type="TextureRect" parent="."]
 layout_mode = 2
@@ -367,3 +371,27 @@ offset_top = 248.0
 offset_right = 566.0
 offset_bottom = 277.0
 script = ExtResource("3")
+
+[node name="ScienceSlider" type="HSlider" parent="Background"]
+layout_mode = 0
+offset_left = 566.0
+offset_top = 83.0
+offset_right = 764.0
+offset_bottom = 113.0
+max_value = 10.0
+value = 5.0
+rounded = true
+script = ExtResource("4_gltop")
+metadata/_custom_type_script = "uid://clv4mgavtlrul"
+
+[node name="LuxurySlider" type="HSlider" parent="Background"]
+layout_mode = 0
+offset_left = 566.0
+offset_top = 132.0
+offset_right = 764.0
+offset_bottom = 162.0
+max_value = 10.0
+value = 5.0
+rounded = true
+script = ExtResource("4_gltop")
+metadata/_custom_type_script = "uid://clv4mgavtlrul"

@@ -81,6 +81,7 @@ local c7_texture_list = {
   "Art/interface/menuButtons.png",
   "Art/Advisors/dialogbox.png",
   "Art/Advisors/domestic.png",
+  "Art/Advisors/domestic_plusminus.png",
   "Art/Tech Chooser/scienceNAV.png",
   "Art/Credits/credits_background.png",
   "Art/city screen/ProductionQueueBox.png",
@@ -112,8 +113,10 @@ local c7_texture_list = {
   "Art/Advisors/culture.png",
   "Art/Advisors/demographics.png",
   "Art/Advisors/wonders_background.png",
+  "Art/Advisors/domestic_plusminus.png",
   "Art/histograph-win5_final.png",
   "Art/histograph-top5_final.png",
+  "Art/3checkboxes-USE.png"
 }
 
 --- For ease of editing, we define the civ colors as hex codes, not 1x1 px images
@@ -151,6 +154,20 @@ local civ_colors = {
   "B0C4DE", -- Light Steel Blue
   "696969"  -- Dim Gray
 }
+
+local tech_icon_replacement_map = {
+  ["tech-2"] = "Masonry.png",
+  ["tech-3"] = "Alphabet.png",
+  ["tech-5"] = "TheWheel.png",
+  ["tech-6"] = "WarriorCode.png",
+  ["tech-7"] = "CeremonialBurial.png",
+  ["tech-10"] = "Mysticism.png",
+  ["tech-13"] = "Code of Laws.png",
+  ["tech-14"] = "Literature.png",
+  ["tech-15"] = "MapMaking.png",
+  ["tech-16"] = "HorsebackRiding.png",
+}
+
 
 -- Build lookup table from c7_texture_list without extensions
 local lookup = {}
@@ -196,9 +213,8 @@ return function(civ3_textures)
   }
 
   function c7_textures.tech_icons.small:map_object_to_sprite(tech)
-    return {
-      path = "Art/Tech Chooser/Icons/placeholder.png",
-    }
+    local icon = tech_icon_replacement_map[tostring(tech.id)] or "placeholder.png"
+    return { path = "Art/Tech Chooser/Icons/" .. icon }
   end
 
   function c7_textures.leader_heads:map_object_to_sprite(player_or_civ)

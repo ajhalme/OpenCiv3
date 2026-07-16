@@ -42,7 +42,8 @@ public partial class QuickStartSetup : Node {
 			playerCivilization = player,
 			difficulty = difficulty,
 			worldCharacteristics = global.WorldCharacteristics,
-			opponents = opponents
+			opponents = opponents,
+			victoryConditions = new VictoryConditions() // TODO: default/preferred victory conditions
 		};
 
 		gameSetup.Populate(save);

@@ -49,6 +49,7 @@ namespace C7GameData {
 		public ExperienceLevel defaultExperienceLevel;
 		public Rules rules;
 		public TimeOptions timeOptions;
+		public VictoryConditions victoryConditions;
 
 		public BarbarianInfo barbarianInfo = new BarbarianInfo();
 
@@ -110,6 +111,15 @@ namespace C7GameData {
 			}
 
 			return null;
+		}
+
+		public List<Player> GetRivals(Player player) {
+			return players.Where(p => !p.isBarbarians && p != player && !p.defeated).ToList();
+		}
+
+		public List<Player> GetKnownRivals(Player player) {
+			var rivals = GetRivals(player);
+			return rivals.Where(x => player.playerRelationships.ContainsKey(x.id)).ToList();
 		}
 
 		public MapUnit GetUnit(ID id) {
@@ -230,16 +240,36 @@ namespace C7GameData {
 			UpdateTileOwners();
 		}
 
-		public bool CheckForCivDestruction(Player player) {
+		public void CheckForCivDestructionAndNotifyUi(Player player) {
+			if (this.CheckForCivDestruction(player)) {
+				this.CivDestructionCallback(player);
+				// Let the UI know about the civ destruction.
+				new MsgCivilizationDestroyed(player.civilization).send();
+			}
+		}
+
+		private bool CheckForCivDestruction(Player player) {
 			// TODO: Implement the full set of conditions for destroying a civ;
 			// handling cases like 1 city elimination, regicide, settlers that
 			// are still alive, etc.
+			if (player.isBarbarians) {
+				return false;
+			}
 			if (player.RemainingCities() > 0) {
 				return false;
 			}
+			if (player.units.Any(u => u.unitType.isSettler)) {
+				return false;
+			}
 
-			// This was the last city of the civilization, so destroy remaining
-			// units.
+			return true;
+		}
+
+		private void CivDestructionCallback(Player player) {
+			// Mark player as defeated, so when we start removing units,
+			// we don't have to check each time if the civ is destroyed
+			player.defeated = true;
+
 			// Start from the end and start deleting backwards
 			// because the other way doesn't actually go through all units
 			// probably because we keep modifying the list and its count gets all messed up
@@ -247,14 +277,10 @@ namespace C7GameData {
 				RemoveUnit(player.units[i]);
 			}
 
-			player.defeated = true;
-
 			// Remove this civ from all other player's relationships.
 			foreach (Player p in players) {
 				p.playerRelationships.Remove(player.id);
 			}
-
-			return true;
 		}
 
 		[LuaMethod]
@@ -302,10 +328,13 @@ namespace C7GameData {
 			// and end up introducing a bunch of bugs.
 			// If it ends up being a problem, we could certainly look into this more.
 			owner.tileKnowledge.RecomputeActiveTiles();
+
+			if (!owner.defeated)
+				CheckForCivDestructionAndNotifyUi(unit.owner);
 		}
 
 		internal void SpawnUnit(Player player, UnitPrototype proto, Tile tile) {
-			// TODO: consolidate unit spawning routines (here) 
+			// TODO: consolidate unit spawning routines (here)
 
 			var defaultExpLevel = this.defaultExperienceLevel;
 			var barbExpLevel = this.experienceLevels.First(e => e.baseHitPoints == this.barbarianInfo.maxHitpoints);
