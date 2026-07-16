@@ -239,6 +239,8 @@ public partial class RightClickTileMenu : RightClickMenu {
 			AddItem("Abandon City", () => {
 				this.CloseAndDelete();
 				EngineStorage.ReadGameData((GameData gameData) => {
+					// TODO: perhaps add some conditions as to when we are able to do that,
+					// and if not add a popup message to explain why not (eg last city)
 					new MsgDisplayAbandonCityPopup(tile.cityAtTile).send();
 				});
 			});
@@ -369,6 +371,8 @@ public partial class RightClickCityMenu : RightClickMenu {
 			AddItem("Abandon City", () => {
 				this.CloseAndDelete();
 				EngineStorage.ReadGameData((GameData gameData) => {
+					// TODO: perhaps add some conditions as to when we are able to do that,
+					// and if not add a popup message to explain why not (eg last city)
 					new MsgDisplayAbandonCityPopup(tile.cityAtTile).send();
 				});
 			});
