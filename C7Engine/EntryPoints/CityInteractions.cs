@@ -46,7 +46,7 @@ namespace C7Engine {
 		}
 
 		public static void DestroyCity(City city) {
-			DestroyCity(city.location.XCoordinate, city.location.YCoordinate);
+			DestroyCity(city.location);
 		}
 		public static void DestroyCity(Tile tile) {
 			DestroyCity(tile.XCoordinate, tile.YCoordinate);
