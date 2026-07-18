@@ -152,6 +152,20 @@ local civ_colors = {
   "696969"  -- Dim Gray
 }
 
+local tech_icon_replacement_map = {
+  ["tech-2"] = "Masonry.png",
+  ["tech-3"] = "Alphabet.png",
+  ["tech-5"] = "TheWheel.png",
+  ["tech-6"] = "WarriorCode.png",
+  ["tech-7"] = "CeremonialBurial.png",
+  ["tech-10"] = "Mysticism.png",
+  ["tech-13"] = "Code of Laws.png",
+  ["tech-14"] = "Literature.png",
+  ["tech-15"] = "MapMaking.png",
+  ["tech-16"] = "HorsebackRiding.png",
+}
+
+
 -- Build lookup table from c7_texture_list without extensions
 local lookup = {}
 for _, path in ipairs(c7_texture_list) do
@@ -196,11 +210,10 @@ return function(civ3_textures)
   }
 
   function c7_textures.tech_icons.small:map_object_to_sprite(tech)
-    return {
-      path = "Art/Tech Chooser/Icons/placeholder.png",
-    }
+    local icon = tech_icon_replacement_map[tostring(tech.id)] or "placeholder.png"
+    return { path = "Art/Tech Chooser/Icons/" .. icon }
   end
-
+  
   function c7_textures.leader_heads:map_object_to_sprite(player_or_civ)
     return {
       path = "Art/Advisors/placeholder_leaderhead.png",
