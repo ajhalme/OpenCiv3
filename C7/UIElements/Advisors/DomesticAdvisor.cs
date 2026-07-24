@@ -2,7 +2,7 @@ using C7Engine;
 using C7GameData;
 using Godot;
 using System.Collections.Generic;
-using System;
+using System.Linq;
 
 [GlobalClass]
 [Tool]
@@ -30,11 +30,12 @@ public partial class DomesticAdvisor : Control {
 	[Export] TextureButton contentFace;
 	[Export] TextureButton beaker;
 	[Export] TextureButton treasuryIcon;
+	[Export] HSlider scienceSlider;
+	[Export] HSlider luxurySlider;
+
 	PopupOverlay popupOverlay;
 
-	TextureRect scienceSliderIcon = new();
 	Label scienceSliderLabel = new();
-	TextureRect luxurySliderIcon = new();
 	Label luxurySliderLabel = new();
 
 	TextureRect advisorHead = new();
@@ -43,6 +44,8 @@ public partial class DomesticAdvisor : Control {
 	// The Y position of the two sliders.
 	private int scienceSliderY = 84;
 	private int luxurySliderY = 130;
+
+	private Player playerController = null;
 
 	public DomesticAdvisor() {
 		MouseFilter = MouseFilterEnum.Stop;
@@ -89,47 +92,59 @@ public partial class DomesticAdvisor : Control {
 		int scienceRate = 5;
 		int luxuryRate = 5;
 
-		scienceSliderIcon.Texture = scienceSliderTexture;
-		scienceSliderIcon.SetPosition(new Vector2(CalculateSliderXPos(scienceRate), scienceSliderY));
-		background.AddChild(scienceSliderIcon);
+		scienceSlider.Value = scienceRate;
+		scienceSlider.AddThemeIconOverride("grabber", scienceSliderTexture);
+		scienceSlider.AddThemeIconOverride("grabber_highlight", scienceSliderTexture);
+		scienceSlider.AddThemeIconOverride("grabber_disabled", scienceSliderTexture);
+		scienceSlider.AddThemeStyleboxOverride("slider", new StyleBoxEmpty());
 
-		luxurySliderIcon.Texture = luxurySliderTexture;
-		luxurySliderIcon.SetPosition(new Vector2(CalculateSliderXPos(luxuryRate), luxurySliderY));
-		background.AddChild(luxurySliderIcon);
+		scienceSlider.ValueChanged += value => {
+			UpdateScienceSlider((int)value);
+		};
+
+		luxurySlider.Value = luxuryRate;
+		luxurySlider.AddThemeIconOverride("grabber", luxurySliderTexture);
+		luxurySlider.AddThemeIconOverride("grabber_highlight", luxurySliderTexture);
+		luxurySlider.AddThemeIconOverride("grabber_disabled", luxurySliderTexture);
+		luxurySlider.AddThemeStyleboxOverride("slider", new StyleBoxEmpty());
+
+		luxurySlider.ValueChanged += value => {
+			UpdateLuxurySlider((int)value);
+		};
 
 		scienceSliderLabel.Text = $"{scienceRate * 10}%";
-		scienceSliderLabel.SetPosition(new Vector2(760, scienceSliderY + 6));
+		scienceSliderLabel.SetPosition(new Vector2(760, scienceSliderY + 5));
 		background.AddChild(scienceSliderLabel);
 
 		luxurySliderLabel.Text = $"{luxuryRate * 10}%";
 		luxurySliderLabel.SetPosition(new Vector2(760, luxurySliderY + 4));
 		background.AddChild(luxurySliderLabel);
 
-		ImageTexture plusTexture = TextureLoader.Load("icons.plus");
-		ImageTexture minusTexture = TextureLoader.Load("icons.minus");
+		var plusConfigKey = "advisors.domestic.plus";
+		var minusConfigKey = "advisors.domestic.minus";
 
 		TextureButton moreScience = new();
-		moreScience.TextureNormal = plusTexture;
-		moreScience.SetPosition(new Vector2(725, scienceSliderY + 25));
-		moreScience.Pressed += () => { new MsgChangeSliders(true, false, false, false).send(); };
+		TextureLoader.SetButtonTextures(moreScience, plusConfigKey);
+		moreScience.SetPosition(new Vector2(732, scienceSliderY + 27));
+		moreScience.Pressed += MoreScience;
 		background.AddChild(moreScience);
 
 		TextureButton lessScience = new();
-		lessScience.TextureNormal = minusTexture;
-		lessScience.SetPosition(new Vector2(575, scienceSliderY + 25));
-		lessScience.Pressed += () => { new MsgChangeSliders(false, true, false, false).send(); };
+		TextureLoader.SetButtonTextures(lessScience, minusConfigKey);
+		lessScience.SetPosition(new Vector2(562, scienceSliderY + 29));
+		lessScience.Pressed += LessScience;
 		background.AddChild(lessScience);
 
 		TextureButton moreLuxury = new();
-		moreLuxury.TextureNormal = plusTexture;
-		moreLuxury.SetPosition(new Vector2(725, luxurySliderY - 5));
-		moreLuxury.Pressed += () => { new MsgChangeSliders(false, false, true, false).send(); };
+		TextureLoader.SetButtonTextures(moreLuxury, plusConfigKey);
+		moreLuxury.SetPosition(new Vector2(732, luxurySliderY - 5));
+		moreLuxury.Pressed += MoreLuxury;
 		background.AddChild(moreLuxury);
 
 		TextureButton lessLuxury = new();
-		lessLuxury.TextureNormal = minusTexture;
-		lessLuxury.SetPosition(new Vector2(575, luxurySliderY - 5));
-		lessLuxury.Pressed += () => { new MsgChangeSliders(false, false, false, true).send(); };
+		TextureLoader.SetButtonTextures(lessLuxury, minusConfigKey);
+		lessLuxury.SetPosition(new Vector2(562, luxurySliderY - 3));
+		lessLuxury.Pressed += LessLuxury;
 		background.AddChild(lessLuxury);
 
 		// Column header icons.
@@ -145,31 +160,72 @@ public partial class DomesticAdvisor : Control {
 		treasuryIcon.TextureNormal = TextureLoader.Load("icons.treasury");
 	}
 
+	private void UpdateScienceSlider(int value) {
+		int scienceRate = playerController.scienceRate;
+
+		if (value == scienceRate)
+			return;
+
+		if (value > scienceRate) {
+			MoreScience();
+		} else {
+			LessScience();
+		}
+	}
+
+	private void UpdateLuxurySlider(int value) {
+		int luxuryRate = playerController.luxuryRate;
+
+		if (value == luxuryRate)
+			return;
+
+		if (value > luxuryRate) {
+			MoreLuxury();
+		} else {
+			LessLuxury();
+		}
+	}
+
+	private void MoreScience() {
+		new MsgChangeSliders(true, false, false, false).send();
+	}
+
+	private void MoreLuxury() {
+		new MsgChangeSliders(false, false, true, false).send();
+	}
+	private void LessScience() {
+		new MsgChangeSliders(false, true, false, false).send();
+	}
+
+	private void LessLuxury() {
+		new MsgChangeSliders(false, false, false, true).send();
+	}
+
 	public void ShowAdvisor() {
 		Show();
 
 		EngineStorage.ReadGameData((GameData gameData) => {
-			Player player = gameData.GetFirstHumanPlayer();
-			PlayerCommerceBreakdown totalIncome = player.AggregateFlows();
+			playerController = gameData.players.First(p => p.id == EngineStorage.uiControllerID);
+			PlayerCommerceBreakdown totalIncome = playerController.AggregateFlows();
 
-			int scienceRate = player.scienceRate;
-			int luxuryRate = player.luxuryRate;
+			int scienceRate = playerController.scienceRate;
+			int luxuryRate = playerController.luxuryRate;
 
-			scienceSliderIcon.SetPosition(new Vector2(CalculateSliderXPos(scienceRate), scienceSliderY));
-			luxurySliderIcon.SetPosition(new Vector2(CalculateSliderXPos(luxuryRate), luxurySliderY));
+			scienceSlider.Value = scienceRate;
 			scienceSliderLabel.Text = $"{scienceRate * 10}%";
+			luxurySlider.Value = luxuryRate;
 			luxurySliderLabel.Text = $"{luxuryRate * 10}%";
 
-			governmentLabel.Text = $"{player.government.name}";
-			scienceStatus.Text = player.SummarizeScience(gameData);
-			treasury.Text = $"Treasury: {player.gold}";
+			governmentLabel.Text = $"{playerController.government.name}";
+			scienceStatus.Text = playerController.SummarizeScience(gameData);
+			treasury.Text = $"Treasury: {playerController.gold}";
 
 			incomeDetails.Text = $"From cities: +{totalIncome.CityInflows()}\nFrom taxmen: +{totalIncome.taxmenTaxes}\nFrom other civs: +{totalIncome.fromOtherCivs}\nFrom interest: +{totalIncome.interest}";
 			expenseDetails.Text = $"-{totalIncome.beakers}: Science\n-{totalIncome.happiness}: Entertainment\n-{totalIncome.corrupted}: Corruption\n-{totalIncome.maintenance}: Maintenance\n-{totalIncome.unitSupport}: Unit costs\n-{totalIncome.toOtherCivs}: To other civs";
 			incomeSummary.Text = $"Income: {totalIncome.Inflows()}";
 			expenseSummary.Text = $"Expenses: {totalIncome.Outflows()}";
 
-			int goldPerTurn = player.CalculateGoldPerTurn();
+			int goldPerTurn = playerController.CalculateGoldPerTurn();
 			if (goldPerTurn > 0) {
 				sumSummary.Text = $"Net gain: +{goldPerTurn}";
 				growth.Text = "Growing!";
@@ -182,14 +238,14 @@ public partial class DomesticAdvisor : Control {
 			}
 
 			//TODO: Randomize or set logically
-			advisorHead.Texture = AdvisorHead.GetPopupImage(AdvisorHead.Advisor.Domestic, AdvisorHead.Mood.Happy, player.EraIndex());
+			advisorHead.Texture = AdvisorHead.GetPopupImage(AdvisorHead.Advisor.Domestic, AdvisorHead.Mood.Happy, playerController.EraIndex());
 
 			// Disable the change government button unless we have a government to
 			// switch to.
-			changeGovernment.Disabled = player.GetAvailableGovernments(gameData).Count == 1;
+			changeGovernment.Disabled = playerController.GetAvailableGovernments(gameData).Count == 1;
 
-			if (player.government.transitionType && player.inAnarchyUntilTurn > gameData.turn) {
-				DialogBoxAdvise.Text = $"{player.inAnarchyUntilTurn - gameData.turn} turns of anarchy left";
+			if (playerController.government.transitionType && playerController.inAnarchyUntilTurn > gameData.turn) {
+				DialogBoxAdvise.Text = $"{playerController.inAnarchyUntilTurn - gameData.turn} turns of anarchy left";
 			}
 
 			foreach (var node in cityListContainer.GetChildren()) {
@@ -197,7 +253,7 @@ public partial class DomesticAdvisor : Control {
 				node.QueueFree();
 			}
 
-			foreach (City city in player.cities) {
+			foreach (City city in playerController.cities) {
 				cityListContainer.AddChild(MakeCityRow(city));
 			}
 		});
