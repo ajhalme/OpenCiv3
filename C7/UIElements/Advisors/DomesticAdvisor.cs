@@ -3,6 +3,7 @@ using C7GameData;
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using static C7Engine.MsgChangeSliders;
 
 [GlobalClass]
 [Tool]
@@ -187,18 +188,18 @@ public partial class DomesticAdvisor : Control {
 	}
 
 	private void MoreScience() {
-		new MsgChangeSliders(true, false, false, false).send();
+		new MsgChangeSliders(DomesticSlider.MoreScience).send();
 	}
 
 	private void MoreLuxury() {
-		new MsgChangeSliders(false, false, true, false).send();
+		new MsgChangeSliders(DomesticSlider.MoreLuxury).send();
 	}
 	private void LessScience() {
-		new MsgChangeSliders(false, true, false, false).send();
+		new MsgChangeSliders(DomesticSlider.LessScience).send();
 	}
 
 	private void LessLuxury() {
-		new MsgChangeSliders(false, false, false, true).send();
+		new MsgChangeSliders(DomesticSlider.LessLuxury).send();
 	}
 
 	public void ShowAdvisor() {

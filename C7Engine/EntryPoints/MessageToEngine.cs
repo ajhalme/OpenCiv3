@@ -282,16 +282,31 @@ namespace C7Engine {
 	}
 
 	public class MsgChangeSliders : MessageToEngine {
+		public enum DomesticSlider {
+			MoreScience,
+			LessScience,
+			MoreLuxury,
+			LessLuxury,
+		}
+
+		private DomesticSlider slider;
+
 		private bool moreScience;
 		private bool lessScience;
 		private bool moreLuxury;
 		private bool lessLuxury;
 
-		public MsgChangeSliders(bool moreScience, bool lessScience, bool moreLuxury, bool lessLuxury) {
-			this.moreScience = moreScience;
-			this.lessScience = lessScience;
-			this.moreLuxury = moreLuxury;
-			this.lessLuxury = lessLuxury;
+		public MsgChangeSliders(DomesticSlider slider) {
+			this.slider = slider;
+
+			if (slider == DomesticSlider.MoreScience)
+				moreScience = true;
+			if (slider == DomesticSlider.LessScience)
+				lessScience = true;
+			if (slider == DomesticSlider.MoreLuxury)
+				moreLuxury = true;
+			if (slider == DomesticSlider.LessLuxury)
+				lessLuxury = true;
 		}
 
 		public override void process() {
