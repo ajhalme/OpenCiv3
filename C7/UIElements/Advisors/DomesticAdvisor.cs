@@ -188,18 +188,18 @@ public partial class DomesticAdvisor : Control {
 	}
 
 	private void MoreScience() {
-		new MsgChangeSliders(DomesticSlider.MoreScience).send();
+		new MsgChangeSliders(playerController.id, DomesticPolicyChoice.MoreScience).send();
 	}
 
 	private void MoreLuxury() {
-		new MsgChangeSliders(DomesticSlider.MoreLuxury).send();
+		new MsgChangeSliders(playerController.id, DomesticPolicyChoice.MoreLuxury).send();
 	}
 	private void LessScience() {
-		new MsgChangeSliders(DomesticSlider.LessScience).send();
+		new MsgChangeSliders(playerController.id, DomesticPolicyChoice.LessScience).send();
 	}
 
 	private void LessLuxury() {
-		new MsgChangeSliders(DomesticSlider.LessLuxury).send();
+		new MsgChangeSliders(playerController.id, DomesticPolicyChoice.LessLuxury).send();
 	}
 
 	public void ShowAdvisor() {

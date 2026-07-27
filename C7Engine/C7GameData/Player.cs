@@ -119,6 +119,14 @@ namespace C7GameData {
 		public int scienceRate = 5;
 		public int taxRate = 5;
 
+		// These values could be added in the rules or something,
+		// and also synchronised with the HSlider bar in the editor.
+		// For now, I am leaving them hardcoded here.
+		public int maxScienceRate { get; private set; } = 10;
+		public int minScienceRate { get; private set; } = 0;
+		public int maxLuxuryRate { get; private set; } = 10;
+		public int minLuxuryRate { get; private set; } = 0;
+
 		// The amount of gold this player has.
 		private int _gold = 0;
 		public int gold {

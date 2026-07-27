@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
 
@@ -282,74 +283,42 @@ namespace C7Engine {
 	}
 
 	public class MsgChangeSliders : MessageToEngine {
-		public enum DomesticSlider {
+		public enum DomesticPolicyChoice {
 			MoreScience,
 			LessScience,
 			MoreLuxury,
 			LessLuxury,
 		}
 
-		private DomesticSlider slider;
+		private ID controllerId;
+		private DomesticPolicyChoice policyChoice;
 
-		private bool moreScience;
-		private bool lessScience;
-		private bool moreLuxury;
-		private bool lessLuxury;
-
-		public MsgChangeSliders(DomesticSlider slider) {
-			this.slider = slider;
-
-			if (slider == DomesticSlider.MoreScience)
-				moreScience = true;
-			if (slider == DomesticSlider.LessScience)
-				lessScience = true;
-			if (slider == DomesticSlider.MoreLuxury)
-				moreLuxury = true;
-			if (slider == DomesticSlider.LessLuxury)
-				lessLuxury = true;
+		public MsgChangeSliders(ID controllerId, DomesticPolicyChoice policyChoice) {
+			this.controllerId = controllerId;
+			this.policyChoice = policyChoice;
 		}
 
 		public override void process() {
-			Player player = EngineStorage.gameData.GetFirstHumanPlayer();
+			Player player = null;
+			EngineStorage.ReadGameData(data => {
+				player = data.players.First(p => p.id == controllerId);
+			});
 
-			if (moreScience && player.scienceRate == 10 || lessScience && player.scienceRate == 0) {
-				return;
-			}
-			if (moreLuxury && player.luxuryRate == 10 || lessLuxury && player.luxuryRate == 0) {
-				return;
-			}
-
-			// Increase our science rate, taking away from tax rate if we can,
-			// otherwise decrease the luxury rate.
-			if (moreScience) {
-				player.scienceRate++;
-				if (player.taxRate > 0) {
-					player.taxRate--;
-				} else {
-					player.luxuryRate--;
-				}
-			}
-
-			// Ditto for luxury.
-			if (moreLuxury) {
-				player.luxuryRate++;
-				if (player.taxRate > 0) {
-					player.taxRate--;
-				} else {
-					player.scienceRate--;
-				}
-			}
-
-			// Decreasing is easier, we decrease the requested slider and bump
-			// up the tax rate.
-			if (lessScience) {
-				player.scienceRate--;
-				player.taxRate++;
-			}
-
-			if (lessLuxury) {
-				player.luxuryRate--;
-				player.taxRate++;
+			switch (policyChoice) {
+				case DomesticPolicyChoice.MoreScience:
+					MoreScience(player);
+					break;
+				case DomesticPolicyChoice.LessScience:
+					LessScience(player);
+					break;
+				case DomesticPolicyChoice.MoreLuxury:
+					MoreLuxury(player);
+					break;
+				case DomesticPolicyChoice.LessLuxury:
+					LessLuxury(player);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
 
 			// Update citizen moods in all cities, as changing the sliders can
@@ -360,6 +329,55 @@ namespace C7Engine {
 
 			// Update the ui to reflect our changes.
 			new MsgUpdateUiAfterDomesticChange().send();
+		}
+
+		// Increase our science rate, taking away from tax rate if we can,
+		// otherwise decrease the luxury rate.
+		private void MoreScience(Player player) {
+			if (player.scienceRate == player.maxScienceRate) {
+				return;
+			}
+
+			player.scienceRate++;
+			if (player.taxRate > 0) {
+				player.taxRate--;
+			} else {
+				player.luxuryRate--;
+			}
+		}
+
+		// Ditto for luxury.
+		private static void MoreLuxury(Player player) {
+			if (player.luxuryRate == player.maxLuxuryRate) {
+				return;
+			}
+
+			player.luxuryRate++;
+			if (player.taxRate > 0) {
+				player.taxRate--;
+			} else {
+				player.scienceRate--;
+			}
+		}
+
+		// Decreasing is easier, we decrease the requested slider and bump
+		// up the tax rate.
+		private static void LessScience(Player player) {
+			if (player.scienceRate == player.minScienceRate) {
+				return;
+			}
+
+			player.scienceRate--;
+			player.taxRate++;
+		}
+
+		private static void LessLuxury(Player player) {
+			if (player.luxuryRate == player.minLuxuryRate) {
+				return;
+			}
+
+			player.luxuryRate--;
+			player.taxRate++;
 		}
 	}
 
