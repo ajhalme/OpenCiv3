@@ -3,6 +3,7 @@ using C7GameData;
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using C7.UIElements;
 using static C7Engine.MsgChangeSliders;
 
 [GlobalClass]
@@ -31,8 +32,8 @@ public partial class DomesticAdvisor : Control {
 	[Export] TextureButton contentFace;
 	[Export] TextureButton beaker;
 	[Export] TextureButton treasuryIcon;
-	[Export] HSlider scienceSlider;
-	[Export] HSlider luxurySlider;
+	[Export] Civ3HSlider scienceSlider;
+	[Export] Civ3HSlider luxurySlider;
 
 	PopupOverlay popupOverlay;
 
@@ -94,20 +95,22 @@ public partial class DomesticAdvisor : Control {
 		int luxuryRate = 5;
 
 		scienceSlider.Value = scienceRate;
-		scienceSlider.AddThemeIconOverride("grabber", scienceSliderTexture);
-		scienceSlider.AddThemeIconOverride("grabber_highlight", scienceSliderTexture);
-		scienceSlider.AddThemeIconOverride("grabber_disabled", scienceSliderTexture);
-		scienceSlider.AddThemeStyleboxOverride("slider", new StyleBoxEmpty());
+
+		scienceSlider
+			.AddGrabber(scienceSliderTexture)
+			.AddGrabberHighlight(scienceSliderTexture)
+			.AddSliderStyleBox(new StyleBoxEmpty());
 
 		scienceSlider.ValueChanged += value => {
 			UpdateScienceSlider((int)value);
 		};
 
 		luxurySlider.Value = luxuryRate;
-		luxurySlider.AddThemeIconOverride("grabber", luxurySliderTexture);
-		luxurySlider.AddThemeIconOverride("grabber_highlight", luxurySliderTexture);
-		luxurySlider.AddThemeIconOverride("grabber_disabled", luxurySliderTexture);
-		luxurySlider.AddThemeStyleboxOverride("slider", new StyleBoxEmpty());
+
+		luxurySlider
+			.AddGrabber(luxurySliderTexture)
+			.AddGrabberHighlight(luxurySliderTexture)
+			.AddSliderStyleBox(new StyleBoxEmpty());
 
 		luxurySlider.ValueChanged += value => {
 			UpdateLuxurySlider((int)value);
