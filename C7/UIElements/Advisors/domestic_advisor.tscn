@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://da7hbbufyfllg"]
+[gd_scene load_steps=8 format=3 uid="uid://da7hbbufyfllg"]
 
 [ext_resource type="Script" uid="uid://ch2d6f1o1sxh2" path="res://UIElements/Advisors/DomesticAdvisor.cs" id="1"]
 [ext_resource type="Script" uid="uid://doqipc4rnaotx" path="res://UIElements/Civ3TextureRect.cs" id="2"]
