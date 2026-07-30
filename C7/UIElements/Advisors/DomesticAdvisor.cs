@@ -96,7 +96,7 @@ public partial class DomesticAdvisor : Control {
 
 		scienceSlider.Value = scienceRate;
 
-		scienceSlider
+		scienceSlider.rangeTheme
 			.AddGrabber(scienceSliderTexture)
 			.AddGrabberHighlight(scienceSliderTexture)
 			.AddSliderStyleBox(new StyleBoxEmpty());
@@ -107,7 +107,7 @@ public partial class DomesticAdvisor : Control {
 
 		luxurySlider.Value = luxuryRate;
 
-		luxurySlider
+		luxurySlider.rangeTheme
 			.AddGrabber(luxurySliderTexture)
 			.AddGrabberHighlight(luxurySliderTexture)
 			.AddSliderStyleBox(new StyleBoxEmpty());
