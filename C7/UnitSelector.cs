@@ -35,6 +35,7 @@ public partial class UnitSelector : Node {
 
 	public override void _Process(double delta) {
 		if (game.CurrentState != GameState.PlayerTurn) return;
+		if (NoMoreAutoselectableUnitsEmitted) return;
 		if (EngineStorage.HasPendingAnimations()) return;
 
 		// If no unit is selected, move to the next one
