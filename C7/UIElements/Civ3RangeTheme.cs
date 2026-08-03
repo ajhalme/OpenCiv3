@@ -142,7 +142,7 @@ public class Civ3RangeTheme {
 		return this;
 	}
 
-	public void Apply() {
+	private void ApplyOverrides() {
 		SetIcon(GRABBER, Grabber);
 		SetIcon(GRABBER_HIGHLIGHT, GrabberHighlight);
 		SetIcon(GRABBER_PRESSED, GrabberPressed);
@@ -163,7 +163,7 @@ public class Civ3RangeTheme {
 		SetStyleBox(GRABBER_PRESSED, GrabberPressedStyleBox);
 	}
 
-	public void RemoveOverrides() {
+	private void RemoveOverrides() {
 		foreach (var attr in AllOverrideStrings) {
 			this.range.RemoveThemeIconOverride(attr);
 			this.range.RemoveThemeStyleboxOverride(attr);
@@ -180,11 +180,17 @@ public class Civ3RangeTheme {
 			this.range.AddThemeStyleboxOverride(name, styleBox);
 	}
 
+	// This gets called when working in the editor,
+	// and we save the scene,
+	// once before Godot saves the scene (NotificationEditorPreSave)
+	// and once after (NotificationEditorPostSave).
+	// It removes and re-applies respectively this custom theme 
+	// so that Godot doesn't serialize the icon override textures.
 	public void ClearAndRestoreOverrides(int what) {
 		if (what == Node.NotificationEditorPreSave)
 			this.RemoveOverrides();
 
 		if (what == Node.NotificationEditorPostSave)
-			this.Apply();
+			this.ApplyOverrides();
 	}
 }
