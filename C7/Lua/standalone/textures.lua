@@ -81,6 +81,7 @@ local c7_texture_list = {
   "Art/interface/menuButtons.png",
   "Art/Advisors/dialogbox.png",
   "Art/Advisors/domestic.png",
+  "Art/Advisors/domestic_plusminus.png",
   "Art/Tech Chooser/scienceNAV.png",
   "Art/Credits/credits_background.png",
   "Art/city screen/ProductionQueueBox.png",
