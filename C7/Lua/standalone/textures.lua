@@ -216,7 +216,7 @@ return function(civ3_textures)
     local icon = tech_icon_replacement_map[tostring(tech.id)] or "placeholder.png"
     return { path = "Art/Tech Chooser/Icons/" .. icon }
   end
-
+  
   function c7_textures.leader_heads:map_object_to_sprite(player_or_civ)
     return {
       path = "Art/Advisors/placeholder_leaderhead.png",
