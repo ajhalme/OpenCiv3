@@ -81,11 +81,10 @@ public partial class VictoryStatusView : Control {
 			_victoryConditions.Add(dv);
 		}
 
-		// if (conditions.AllowConquestVictory) {
-		// 	AddConquestVictory(victoryStatus);
-		//
-		// }
-		//
+		if (conditions.AllowConquestVictory) {
+			// TODO: ruleset, Conquest victory condition
+			_victoryConditions.Add(new ConquestVictory(rivalsAliveLimit: 0));
+		}
 
 		// TODO: Does the original have a switch to have the game never end?
 		// Always add time limits
@@ -152,11 +151,6 @@ public partial class VictoryStatusView : Control {
 
 		AddHeaderRow("Diplomatic");
 		AddDataRow("Elected as leader", "", "", "", $"The United Nations built by:{builtBy}", builtByPlaceholder);
-	}
-
-	private void AddConquestVictory(VictoryStatusOld vs) {
-		AddHeaderRow("Conquest");
-		AddDataRow("Eliminate all rivals", "", "", "", "Rivals still alive:", $"{vs.RivalsAlive}");
 	}
 
 	private void ClearGrid() {

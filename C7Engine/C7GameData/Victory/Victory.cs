@@ -12,10 +12,6 @@ public class VictoryStatusOld {
 	public string TopCityName { get; set; }
 	public float TurnScore { get; set; }
 	public bool OwnsUnitedNations { get; set; }
-	public int RivalsAliveLimit { get; set; }
-	public int RivalsAlive { get; set; }
-	public int TurnLimit { get; set; }
-	public int CurrentTurn { get; set; }
 }
 
 public static class VictoryCalculator {
@@ -50,11 +46,6 @@ public static class VictoryCalculator {
 		var totalCulture = citiesByCulture.Sum(c => c.Culture);
 		var topCityCulture = citiesByCulture.FirstOrDefault();
 
-		var rivalsAlive = gameData.GetRivals(player).Count(p => !p.defeated);
-
-		var turnLimit = gameData.timeOptions.turnLimit;
-		var currentTurn = gameData.turn;
-
 		return new VictoryStatusOld() {
 
 			TotalCultureLimit = 100000, // TODO: ruleset, total culture victory condition
@@ -66,12 +57,6 @@ public static class VictoryCalculator {
 			TurnScore = turnScore,
 
 			OwnsUnitedNations = ownsUnitedNations,
-
-			RivalsAliveLimit = 0, // TODO: ruleset, Conquest victory condition
-			RivalsAlive = rivalsAlive,
-
-			TurnLimit = turnLimit,
-			CurrentTurn = currentTurn
 		};
 	}
 }
