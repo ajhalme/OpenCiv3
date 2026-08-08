@@ -9,12 +9,14 @@ using Godot;
 public partial class VictoryStatusView : Control {
 
 	[Export] public TextureRect background;
+	[Export] public GridContainer gridHeader;
 	[Export] public GridContainer grid;
 	[Export] public float LabelColumnWidth = 185f;
 	[Export] public float ValueColumnWidth = 40f;
 
 	private TextureButton _close;
 
+	private const int GridHeaderColumns = 3;
 	private const int GridColumns = 6;
 
 	private List<IVictory> _victoryConditions;
@@ -39,6 +41,10 @@ public partial class VictoryStatusView : Control {
 	}
 
 	private void ConfigureGrid() {
+		gridHeader.Columns = GridHeaderColumns;
+		gridHeader.AddThemeConstantOverride("h_separation", 0); // horizontal gap between columns
+		gridHeader.AddThemeConstantOverride("v_separation", 5);
+
 		grid.Columns = GridColumns;
 		grid.AddThemeConstantOverride("h_separation", 0); // horizontal gap between columns
 		grid.AddThemeConstantOverride("v_separation", 5);
@@ -62,7 +68,7 @@ public partial class VictoryStatusView : Control {
 
 		// Render
 
-		AddTitleRow("", "To Win", "", player.civilization.name, "", "Top Rival"); // TODO: Draw on separate, 3-col grid
+		AddTitleRow("To Win", player.civilization.name, "Top Rival");
 
 		foreach (IVictory vc in _victoryConditions!) {
 			ProcessVictoryCondition(vc, gameData, player, rivals);
@@ -120,23 +126,19 @@ public partial class VictoryStatusView : Control {
 	}
 
 	private void ClearGrid() {
+		foreach (Node child in gridHeader.GetChildren())
+			child.QueueFree();
+
 		foreach (Node child in grid.GetChildren())
 			child.QueueFree();
 	}
 
 	/// Titles; column headers
 	public void AddTitleRow(params string[] values) {
-		for (int i = 0; i < GridColumns; i++) {
-			bool isLabelCol = i % 2 == 1;
-
-			if (isLabelCol) {
-				string valueText = values[i] + "    ";
-				var label = MakeLabel(valueText, ValueColumnWidth, HorizontalAlignment.Right);
-				label.AddThemeFontSizeOverride("font_size", 18);
-				grid.AddChild(label);
-			} else {
-				grid.AddChild(MakeSpacer(LabelColumnWidth));
-			}
+		for (int i = 0; i < GridHeaderColumns; i++) {
+			var label = MakeLabel(values[i], ValueColumnWidth, HorizontalAlignment.Right);
+			label.AddThemeFontSizeOverride("font_size", 18);
+			gridHeader.AddChild(label);
 		}
 	}
 
