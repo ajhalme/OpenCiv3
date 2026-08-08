@@ -4,12 +4,6 @@ using System.Linq;
 namespace C7GameData;
 
 public class VictoryStatusOld {
-
-	public int TotalCultureLimit { get; set; }
-	public int TotalCulture { get; set; }
-	public int TopCityCultureLimit { get; set; }
-	public int TopCityCulture { get; set; }
-	public string TopCityName { get; set; }
 	public float TurnScore { get; set; }
 	public bool OwnsUnitedNations { get; set; }
 }
@@ -38,21 +32,7 @@ public static class VictoryCalculator {
 		var ownsUnitedNations = player.cities
 			.Any(c => c.GetBuildings().Any(b => b.building.CanTriggerDiplomaticVictoryVote));
 
-		var citiesByCulture = player.cities
-			.Select(c => new { Name = c.name, Culture = c.GetCulture()})
-			.OrderByDescending(c => c.Culture)
-			.ToList();
-
-		var totalCulture = citiesByCulture.Sum(c => c.Culture);
-		var topCityCulture = citiesByCulture.FirstOrDefault();
-
 		return new VictoryStatusOld() {
-
-			TotalCultureLimit = 100000, // TODO: ruleset, total culture victory condition
-			TotalCulture = totalCulture,
-			TopCityCultureLimit = 20000, // TODO: ruleset, one city culture victory condition
-			TopCityCulture = topCityCulture?.Culture ?? 0,
-			TopCityName = topCityCulture?.Name ?? "None",
 
 			TurnScore = turnScore,
 

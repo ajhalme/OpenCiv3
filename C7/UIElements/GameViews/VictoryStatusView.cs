@@ -69,7 +69,7 @@ public partial class VictoryStatusView : Control {
 		}
 	}
 
-	private void RegisterVictoryConditions(GameData gameData) {
+	private void RegisterVictoryConditions(GameData gameData) { // TODO: push into gameData
 		_victoryConditions = [];
 
 		VictoryConditions conditions = gameData.victoryConditions;
@@ -77,8 +77,13 @@ public partial class VictoryStatusView : Control {
 		if (conditions.AllowDominationVictory) {
 			var dominationAreaLimit = 66f; // TODO: ruleset, dom area victory condition
 			var dominationPopulationLimit = 66f; // TODO: ruleset, dom pop victory condition
-			var dv = new DominationVictory(dominationAreaLimit, dominationPopulationLimit);
-			_victoryConditions.Add(dv);
+			_victoryConditions.Add(new DominationVictory(dominationAreaLimit, dominationPopulationLimit));
+		}
+
+		if (conditions.AllowCulturalVictory) {
+			var totalCultureLimit = 100000; // TODO: ruleset, total culture victory condition
+			var topCityCultureLimit = 20000; // TODO: ruleset, one city culture victory condition
+			_victoryConditions.Add(new CulturalVictory(totalCultureLimit, topCityCultureLimit));
 		}
 
 		if (conditions.AllowConquestVictory) {
@@ -100,26 +105,6 @@ public partial class VictoryStatusView : Control {
 		foreach (string[] output in dv.GenerateStatusRows(status, rivalStatuses)) {
 			AddDataRow(output);
 		}
-	}
-
-	private void AddCulturalVictory(VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
-		var topRivalByCultureOneCity =
-			rivalStatuses.OrderByDescending(r => r.Value.TopCityCulture).First();
-
-		var topRivalByCulture =
-			rivalStatuses.OrderByDescending(r => r.Value.TotalCulture).First();
-
-		AddHeaderRow("Cultural");
-
-		AddDataRow("One city", $"{vs.TopCityCultureLimit}",
-			vs.TopCityName, $"{vs.TopCityCulture}",
-			$"{topRivalByCultureOneCity.Value.TopCityName} ({topRivalByCultureOneCity.Key.civilization.name})",
-			$"{topRivalByCultureOneCity.Value.TopCityCulture}");
-
-		AddDataRow("Entire civilization", $"{vs.TotalCultureLimit}",
-			"Entire civilization", $"{vs.TotalCulture}",
-			$"{topRivalByCulture.Key.civilization.name}",
-			$"{topRivalByCulture.Value.TopCityCulture}");
 	}
 
 	private void AddScore(VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {

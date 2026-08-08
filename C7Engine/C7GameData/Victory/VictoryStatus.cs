@@ -7,4 +7,7 @@ public class VictoryStatus {
 	public float DominationPopulation { get; set; }
 	public int RivalsAlive { get; set; }
 	public int CurrentTurn { get; set; }
+	public int TotalCulture { get; set; }
+	public int TopCityCulture { get; set; }
+	public string TopCityName { get; set; }
 }
