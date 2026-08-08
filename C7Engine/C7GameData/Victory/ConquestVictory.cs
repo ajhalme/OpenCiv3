@@ -27,10 +27,10 @@ public class ConquestVictory : IVictory {
 	}
 
 	public IEnumerable<string[]> GenerateStatusRows(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
-		yield return TurnLimitPrint(status, rivalStatuses);
+		yield return ConquestPrint(status, rivalStatuses);
 	}
 
-	private string[] TurnLimitPrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
+	private string[] ConquestPrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
 		return [
 			"Eliminate all rivals",
 			"",

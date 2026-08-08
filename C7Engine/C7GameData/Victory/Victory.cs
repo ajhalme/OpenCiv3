@@ -5,7 +5,6 @@ namespace C7GameData;
 
 public class VictoryStatusOld {
 	public float TurnScore { get; set; }
-	public bool OwnsUnitedNations { get; set; }
 }
 
 public static class VictoryCalculator {
@@ -29,14 +28,9 @@ public static class VictoryCalculator {
 
 		var spaceRaceParts = 0; // TODO: space race
 
-		var ownsUnitedNations = player.cities
-			.Any(c => c.GetBuildings().Any(b => b.building.CanTriggerDiplomaticVictoryVote));
-
 		return new VictoryStatusOld() {
 
 			TurnScore = turnScore,
-
-			OwnsUnitedNations = ownsUnitedNations,
 		};
 	}
 }

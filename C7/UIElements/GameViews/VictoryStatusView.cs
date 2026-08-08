@@ -86,6 +86,16 @@ public partial class VictoryStatusView : Control {
 			_victoryConditions.Add(new CulturalVictory(totalCultureLimit, topCityCultureLimit));
 		}
 
+
+
+		if (conditions.AllowSpaceRaceVictory) {
+			_victoryConditions.Add(new SpaceRaceVictory());
+		}
+
+		if (conditions.AllowDiplomaticVictory) {
+			_victoryConditions.Add(new DiplomaticVictory());
+		}
+
 		if (conditions.AllowConquestVictory) {
 			// TODO: ruleset, Conquest victory condition
 			_victoryConditions.Add(new ConquestVictory(rivalsAliveLimit: 0));
@@ -117,25 +127,6 @@ public partial class VictoryStatusView : Control {
 			"Current score:", $"{vs.TurnScore}",
 			$"{topRivalByScore.Key.civilization.name}",
 			$"{topRivalByScore.Value.TurnScore}");
-	}
-
-	private void AddSpaceRaceVictory(VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
-		// TODO: Space race
-
-		AddHeaderRow("Space Race");
-		AddDataRow("Parts built:", "??", "Parts built:", "??", "", "");
-	}
-
-	private void AddDiplomaticVictory(Player player, VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
-		KeyValuePair<Player, VictoryStatusOld> ownsUnitedNations
-			= rivalStatuses.FirstOrDefault(x => x.Value.OwnsUnitedNations);
-
-		Player owner = ownsUnitedNations.Key ?? (vs.OwnsUnitedNations ? player : null);
-		string builtBy = owner == null ? "" : $"\n{owner.civilization.name}";
-		string builtByPlaceholder = owner == null ? "No one" : "";
-
-		AddHeaderRow("Diplomatic");
-		AddDataRow("Elected as leader", "", "", "", $"The United Nations built by:{builtBy}", builtByPlaceholder);
 	}
 
 	private void ClearGrid() {
