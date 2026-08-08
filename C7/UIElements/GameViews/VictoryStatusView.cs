@@ -17,7 +17,7 @@ public partial class VictoryStatusView : Control {
 
 	private const int GridColumns = 6;
 
-	private List<IVictory> _victoryConditions = null;
+	private List<IVictory> _victoryConditions;
 
 	public VictoryStatusView() {
 		MouseFilter = MouseFilterEnum.Stop;
@@ -86,10 +86,12 @@ public partial class VictoryStatusView : Control {
 			_victoryConditions.Add(new CulturalVictory(totalCultureLimit, topCityCultureLimit));
 		}
 
-
+		// Always render score (not a victory condition in itself)
+		_victoryConditions.Add(new ScoreVictory());
 
 		if (conditions.AllowSpaceRaceVictory) {
-			_victoryConditions.Add(new SpaceRaceVictory());
+			var partsToBuild = 10; // TODO: ruleset, space race victory condition
+			_victoryConditions.Add(new SpaceRaceVictory(partsToBuild));
 		}
 
 		if (conditions.AllowDiplomaticVictory) {
@@ -115,18 +117,6 @@ public partial class VictoryStatusView : Control {
 		foreach (string[] output in dv.GenerateStatusRows(status, rivalStatuses)) {
 			AddDataRow(output);
 		}
-	}
-
-	private void AddScore(VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
-		var topRivalByScore =
-			rivalStatuses.OrderByDescending(r => r.Value.TurnScore).First();
-
-		AddHeaderRow("Score (Turn)"); // TODO: Use proper score (average over turns)
-
-		AddDataRow("Tie-breaker at time limit", "",
-			"Current score:", $"{vs.TurnScore}",
-			$"{topRivalByScore.Key.civilization.name}",
-			$"{topRivalByScore.Value.TurnScore}");
 	}
 
 	private void ClearGrid() {

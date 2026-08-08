@@ -11,4 +11,5 @@ public class VictoryStatus {
 	public int TopCityCulture { get; set; }
 	public string TopCityName { get; set; }
 	public bool OwnsUnitedNations { get; set; }
+	public float TurnScore { get; set; }
 }

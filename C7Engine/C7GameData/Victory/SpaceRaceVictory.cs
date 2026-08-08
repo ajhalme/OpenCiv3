@@ -4,6 +4,12 @@ using C7GameData;
 namespace C7Engine;
 
 public class SpaceRaceVictory : IVictory {
+	private readonly int _partsToBuild;
+
+	public SpaceRaceVictory(int partsToBuild) {
+		_partsToBuild = partsToBuild;
+	}
+
 	public string Header() => "Space Race";
 
 	public VictoryStatus Evaluate(Player player, GameData gameData) {
@@ -25,8 +31,8 @@ public class SpaceRaceVictory : IVictory {
 	private string[] SpaceRacePrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
 
 		return [
-			"Parts built:",
-			"??",
+			"Parts to build",
+			$"{_partsToBuild}",
 			"Parts built:",
 			"??",
 			"",
