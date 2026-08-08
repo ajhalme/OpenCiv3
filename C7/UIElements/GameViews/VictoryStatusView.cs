@@ -17,10 +17,11 @@ public partial class VictoryStatusView : Control {
 
 	private const int GridColumns = 6;
 
+	private List<IVictory> _victoryConditions = null;
+
 	public VictoryStatusView() {
 		MouseFilter = MouseFilterEnum.Stop;
 	}
-
 
 	public override void _Ready() {
 		CreateUI();
@@ -54,61 +55,56 @@ public partial class VictoryStatusView : Control {
 
 		VictoryConditions conditions = gameData.victoryConditions;
 
+		if (_victoryConditions == null) {
+			RegisterVictoryConditions(conditions);
+		}
+
 		Player player = gameData.GetFirstHumanPlayer();
 		List<Player> rivals = gameData.GetKnownRivals(player);
 
-		VictoryStatus victoryStatus = VictoryCalculator.ComputeVictoryStatus(player, gameData);
-		Dictionary<Player, VictoryStatus> rivalStatuses =
-			rivals.ToDictionary(r => r, r => VictoryCalculator.ComputeVictoryStatus(r, gameData));
-
 		// Render
 
-		AddTitleRow("", "To Win", "", player.civilization.name, "", "Top Rival");
+		AddTitleRow("", "To Win", "", player.civilization.name, "", "Top Rival"); // TODO: Draw on separate, 3-col grid
+
+		foreach (IVictory vc in _victoryConditions!) {
+			ProcessVictoryCondition(vc, gameData, player, rivals);
+		}
+	}
+
+	private void RegisterVictoryConditions(VictoryConditions conditions) {
+		_victoryConditions = [];
 
 		if (conditions.AllowDominationVictory) {
-			AddDominationVictory(victoryStatus, rivalStatuses);
+			var dominationAreaLimit = 66f; // TODO: ruleset, dom area victory condition
+			var dominationPopulationLimit = 66f; // TODO: ruleset, dom pop victory condition
+			var dv = new DominationVictory(dominationAreaLimit, dominationPopulationLimit);
+			_victoryConditions.Add(dv);
 		}
 
-		// AddCulturalVictory(victoryStatus, rivalStatuses);
-		// AddScore(victoryStatus, rivalStatuses);
-		// AddSpaceRaceVictory(victoryStatus, rivalStatuses);
-		// AddDiplomaticVictory(player, victoryStatus, rivalStatuses);
+		// if (conditions.AllowConquestVictory) {
+		// 	AddConquestVictory(victoryStatus);
+		//
+		// }
+		//
 
-		if (conditions.AllowConquestVictory) {
-			AddConquestVictory(victoryStatus);
+		// TODO: Oes the original have a switch to have the game never end?
+		// Always add time limits
+		// AddTimeLimits(victoryStatus);
+		// _victoryConditions.Add(dv);
+	}
+
+	private void ProcessVictoryCondition(IVictory dv, GameData gameData, Player player, List<Player> rivals) {
+		VictoryStatus status = dv.Evaluate(player, gameData);
+		List<VictoryStatus> rivalStatuses = rivals.Select(r => dv.Evaluate(r, gameData)).ToList();
+
+		AddHeaderRow(dv.Header());
+
+		foreach (string[] output in dv.GenerateStatusRows(status, rivalStatuses)) {
+			AddDataRow(output);
 		}
-
-		AddTimeLimits(victoryStatus);
 	}
 
-	private void AddDominationVictory(VictoryStatus vs, Dictionary<Player, VictoryStatus> rivalStatuses) {
-		AddHeaderRow("Domination");
-
-		var topRivalByDominationArea =
-			rivalStatuses.OrderByDescending(r => r.Value.DominationArea).FirstOrDefault();
-
-		var topAreaRival = topRivalByDominationArea.Key?.civilization?.name ?? "";
-		var topAreaRivalValue = topRivalByDominationArea.Value?.DominationArea ?? float.NaN;
-
-		AddDataRow("% of world area:", $"{vs.DominationAreaLimit}",
-			"Your % of world area:", $"{vs.DominationArea:F0}",
-			topAreaRival,
-			float.IsNaN(topAreaRivalValue) ? "" : $"{topAreaRivalValue:F0}");
-
-
-		var topRivalByDominationPopulation =
-			rivalStatuses.OrderByDescending(r => r.Value.DominationPopulation).FirstOrDefault();
-
-		var topPopRival = topRivalByDominationPopulation.Key?.civilization?.name ?? "";
-		var topPopRivalValue = topRivalByDominationPopulation.Value?.DominationPopulation ?? float.NaN;
-
-		AddDataRow("% of world population:", $"{vs.DominationPopulationLimit}",
-			"Your % of world population:", $"{vs.DominationPopulation:F0}",
-			topPopRival,
-			float.IsNaN(topPopRivalValue) ? "" : $"{topPopRivalValue:F0}");
-	}
-
-	private void AddCulturalVictory(VictoryStatus vs, Dictionary<Player, VictoryStatus> rivalStatuses) {
+	private void AddCulturalVictory(VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
 		var topRivalByCultureOneCity =
 			rivalStatuses.OrderByDescending(r => r.Value.TopCityCulture).First();
 
@@ -128,7 +124,7 @@ public partial class VictoryStatusView : Control {
 			$"{topRivalByCulture.Value.TopCityCulture}");
 	}
 
-	private void AddScore(VictoryStatus vs, Dictionary<Player, VictoryStatus> rivalStatuses) {
+	private void AddScore(VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
 		var topRivalByScore =
 			rivalStatuses.OrderByDescending(r => r.Value.TurnScore).First();
 
@@ -140,15 +136,15 @@ public partial class VictoryStatusView : Control {
 			$"{topRivalByScore.Value.TurnScore}");
 	}
 
-	private void AddSpaceRaceVictory(VictoryStatus vs, Dictionary<Player, VictoryStatus> rivalStatuses) {
+	private void AddSpaceRaceVictory(VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
 		// TODO: Space race
 
 		AddHeaderRow("Space Race");
 		AddDataRow("Parts built:", "??", "Parts built:", "??", "", "");
 	}
 
-	private void AddDiplomaticVictory(Player player, VictoryStatus vs, Dictionary<Player, VictoryStatus> rivalStatuses) {
-		KeyValuePair<Player, VictoryStatus> ownsUnitedNations
+	private void AddDiplomaticVictory(Player player, VictoryStatusOld vs, Dictionary<Player, VictoryStatusOld> rivalStatuses) {
+		KeyValuePair<Player, VictoryStatusOld> ownsUnitedNations
 			= rivalStatuses.FirstOrDefault(x => x.Value.OwnsUnitedNations);
 
 		Player owner = ownsUnitedNations.Key ?? (vs.OwnsUnitedNations ? player : null);
@@ -159,12 +155,12 @@ public partial class VictoryStatusView : Control {
 		AddDataRow("Elected as leader", "", "", "", $"The United Nations built by:{builtBy}", builtByPlaceholder);
 	}
 
-	private void AddConquestVictory(VictoryStatus vs) {
+	private void AddConquestVictory(VictoryStatusOld vs) {
 		AddHeaderRow("Conquest");
 		AddDataRow("Eliminate all rivals", "", "", "", "Rivals still alive:", $"{vs.RivalsAlive}");
 	}
 
-	private void AddTimeLimits(VictoryStatus vs) {
+	private void AddTimeLimits(VictoryStatusOld vs) {
 		AddHeaderRow("Time Limits");
 		AddDataRow("Turns in game:", $"{vs.TurnLimit}", "", "", "Current turn:", $"{vs.CurrentTurn}");
 	}
