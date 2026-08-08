@@ -5,7 +5,6 @@ using System.Linq;
 using C7GameData;
 using C7Engine;
 using C7Engine.Lua;
-using C7GameData.Save;
 using Serilog;
 
 public partial class QuickStartSetup : Node {
@@ -43,7 +42,7 @@ public partial class QuickStartSetup : Node {
 			difficulty = difficulty,
 			worldCharacteristics = global.WorldCharacteristics,
 			opponents = opponents,
-			victoryConditions = new VictoryConditions() // TODO: default/preferred victory conditions
+			victoryConditions = VictoryConditions.WarMongerDefault() // TODO: preferred victory conditions
 		};
 
 		gameSetup.Populate(save);

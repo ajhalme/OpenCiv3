@@ -106,7 +106,7 @@ public partial class PlayerSetup : Control {
 	}
 
 	private void AddRules() {
-		victoryConditions = new();
+		victoryConditions = VictoryConditions.WarMongerDefault();
 		rulesContainer.Columns = 2;
 		rulesContainer.AddThemeConstantOverride("v_separation", 0);
 
