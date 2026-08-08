@@ -22,19 +22,22 @@ public class ScoreVictory : IVictory {
 	}
 
 	public IEnumerable<string[]> GenerateStatusRows(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
-		yield return TurnLimitPrint(status, rivalStatuses);
+		yield return TurnScorePrint(status, rivalStatuses);
 	}
 
-	private string[] TurnLimitPrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
-		var topRivalByScore = rivalStatuses.OrderByDescending(r => r.TurnScore).First();
+	private string[] TurnScorePrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
+		var topRivalByScore = rivalStatuses.OrderByDescending(r => r.TurnScore).FirstOrDefault();
+
+		var topRival = topRivalByScore?.Player?.civilization?.name ?? "";
+		var topRivalScore = topRivalByScore == null ? "" : $"{topRivalByScore.TurnScore}";
 
 		return [
 			"Tie-breaker at time limit",
 			"",
 			"Current score:",
 			$"{status.TurnScore}",
-			$"{topRivalByScore.Player.civilization.name}",
-			$"{topRivalByScore.TurnScore}"
+			topRival,
+			topRivalScore
 		];
 	}
 

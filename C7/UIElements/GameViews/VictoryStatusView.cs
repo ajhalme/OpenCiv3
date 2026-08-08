@@ -133,10 +133,14 @@ public partial class VictoryStatusView : Control {
 			child.QueueFree();
 	}
 
+	private const string HeaderPadding = "     ";
+	private const string Padding = "      ";
+
 	/// Titles; column headers
 	public void AddTitleRow(params string[] values) {
 		for (int i = 0; i < GridHeaderColumns; i++) {
-			var label = MakeLabel(values[i], ValueColumnWidth, HorizontalAlignment.Right);
+			var label = MakeLabel(values[i] + HeaderPadding, ValueColumnWidth, HorizontalAlignment.Right);
+			label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
 			label.AddThemeFontSizeOverride("font_size", 18);
 			gridHeader.AddChild(label);
 		}
@@ -177,7 +181,7 @@ public partial class VictoryStatusView : Control {
 
 			var valueNode = new Label
 			{
-				Text = isLabelCol ? valueText : valueText + "      ",
+				Text = isLabelCol ? valueText : valueText + Padding,
 				HorizontalAlignment = isLabelCol ? HorizontalAlignment.Left : HorizontalAlignment.Right,
 				SizeFlagsHorizontal = SizeFlags.ExpandFill
 			};

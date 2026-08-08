@@ -50,7 +50,7 @@ public class DominationVictory : IVictory {
 			"% of world area:",
 			$"{_dominationAreaLimit}",
 			"Your % of world area:",
-			$"{status.DominationArea:F0}",
+			float.IsNaN(status.DominationArea) ? "" : $"{status.DominationArea:F0}",
 			topAreaRival,
 			float.IsNaN(topAreaRivalValue) ? "" : $"{topAreaRivalValue:F0}"
 		];
@@ -67,7 +67,7 @@ public class DominationVictory : IVictory {
 			"% of world population:",
 			$"{_dominationPopulationLimit}",
 			"Your % of world population:",
-			$"{status.DominationPopulation:F0}",
+			float.IsNaN(status.DominationPopulation) ? "" : $"{status.DominationPopulation:F0}",
 			topPopRival,
 			float.IsNaN(topPopRivalValue) ? "" : $"{topPopRivalValue:F0}"
 		];
