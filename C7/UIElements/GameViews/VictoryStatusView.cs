@@ -53,10 +53,8 @@ public partial class VictoryStatusView : Control {
 	private void DrawGrid(GameData gameData) {
 		ClearGrid();
 
-		VictoryConditions conditions = gameData.victoryConditions;
-
 		if (_victoryConditions == null) {
-			RegisterVictoryConditions(conditions);
+			RegisterVictoryConditions(gameData);
 		}
 
 		Player player = gameData.GetFirstHumanPlayer();
@@ -71,8 +69,10 @@ public partial class VictoryStatusView : Control {
 		}
 	}
 
-	private void RegisterVictoryConditions(VictoryConditions conditions) {
+	private void RegisterVictoryConditions(GameData gameData) {
 		_victoryConditions = [];
+
+		VictoryConditions conditions = gameData.victoryConditions;
 
 		if (conditions.AllowDominationVictory) {
 			var dominationAreaLimit = 66f; // TODO: ruleset, dom area victory condition
@@ -87,10 +87,9 @@ public partial class VictoryStatusView : Control {
 		// }
 		//
 
-		// TODO: Oes the original have a switch to have the game never end?
+		// TODO: Does the original have a switch to have the game never end?
 		// Always add time limits
-		// AddTimeLimits(victoryStatus);
-		// _victoryConditions.Add(dv);
+		_victoryConditions.Add(new TimeLimitVictory(gameData.timeOptions.turnLimit));
 	}
 
 	private void ProcessVictoryCondition(IVictory dv, GameData gameData, Player player, List<Player> rivals) {
@@ -158,11 +157,6 @@ public partial class VictoryStatusView : Control {
 	private void AddConquestVictory(VictoryStatusOld vs) {
 		AddHeaderRow("Conquest");
 		AddDataRow("Eliminate all rivals", "", "", "", "Rivals still alive:", $"{vs.RivalsAlive}");
-	}
-
-	private void AddTimeLimits(VictoryStatusOld vs) {
-		AddHeaderRow("Time Limits");
-		AddDataRow("Turns in game:", $"{vs.TurnLimit}", "", "", "Current turn:", $"{vs.CurrentTurn}");
 	}
 
 	private void ClearGrid() {
