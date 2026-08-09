@@ -675,6 +675,10 @@ namespace C7GameData {
 			return perPlayerCulture[owner];
 		}
 
+		public int GetCultureFor(Player player) {
+			return perPlayerCulture.GetValueOrDefault(player, 0);
+		}
+
 		public int GetCulturePerTurnRaw() {
 			int result = 0;
 			foreach (CityBuilding cb in GetBuildings()) {

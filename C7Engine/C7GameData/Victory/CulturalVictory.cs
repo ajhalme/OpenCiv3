@@ -37,8 +37,31 @@ public class CulturalVictory : IVictory {
 	}
 
 	public IEnumerable<string[]> GenerateStatusRows(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
-		yield return TotalCulturePrint(status, rivalStatuses);
 		yield return TopCityCulturePrint(status, rivalStatuses);
+		yield return TotalCulturePrint(status, rivalStatuses);
+	}
+
+	private string[] TopCityCulturePrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
+
+		VictoryStatus topRivalByCultureOneCity = rivalStatuses
+			.OrderByDescending(r => r.TopCityCulture).FirstOrDefault();
+
+		string topCultureRival = topRivalByCultureOneCity?.Player?.civilization?.name ?? "";
+		string topCultureRivalCity = topRivalByCultureOneCity?.TopCityName ?? "";
+		string topCultureRivalCityString = topRivalByCultureOneCity?.TopCityName == null
+			? "" : $"{topCultureRivalCity} ({topCultureRival})";
+
+		int topCultureRivalCityValue = topRivalByCultureOneCity?.TopCityCulture ?? 0;
+		string topCultureRivalCityValueString = topCultureRivalCityValue > 0 ? $"{topCultureRivalCityValue}" : "";
+
+		return [
+			"One city",
+			$"{_cityCultureLimit}",
+			status.TopCityName,
+			$"{status.TopCityCulture}",
+			topCultureRivalCityString,
+			topCultureRivalCityValueString
+			];
 	}
 
 	private string[] TotalCulturePrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
@@ -57,28 +80,5 @@ public class CulturalVictory : IVictory {
 			topCultureRival,
 			topCultureRivalValueString
 		];
-	}
-
-	private string[] TopCityCulturePrint(VictoryStatus status, List<VictoryStatus> rivalStatuses) {
-
-		VictoryStatus topRivalByCultureOneCity = rivalStatuses
-			.OrderByDescending(r => r.TopCityCulture).FirstOrDefault();
-
-		string topCultureRival = topRivalByCultureOneCity?.Player?.civilization?.name ?? "";
-		string topCultureRivalCity = topRivalByCultureOneCity?.TopCityName ?? "";
-		string topCultureRivalCityString = topRivalByCultureOneCity?.TopCityName == null
-			? "" : $"{topCultureRival} ({topCultureRivalCity})";
-
-		int topCultureRivalCityValue = topRivalByCultureOneCity?.TopCityCulture ?? 0;
-		string topCultureRivalCityValueString = topCultureRivalCityValue > 0 ? $"{topCultureRivalCityValue}" : "";
-
-		return [
-			"One city",
-			$"{_cityCultureLimit}",
-			status.TopCityName,
-			$"{status.TopCityCulture}",
-			topCultureRivalCityString,
-			topCultureRivalCityValueString
-			];
 	}
 }
