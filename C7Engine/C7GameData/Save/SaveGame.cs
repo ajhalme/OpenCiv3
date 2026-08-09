@@ -81,6 +81,7 @@ namespace C7GameData.Save {
 				Rules = data.rules,
 				TimeOptions = data.timeOptions,
 				VictoryConditions = data.victoryConditions,
+				History = data.history,
 				TerrainImprovements = data.terrainImprovements.ConvertAll(ti => ti.ToSaveTerrainImprovement()),
 				GameModeConfig = data.gameModeConfig,
 			};
@@ -195,6 +196,7 @@ namespace C7GameData.Save {
 				rules = Rules,
 				timeOptions = TimeOptions,
 				victoryConditions = VictoryConditions,
+				history = History,
 				GreatWondersBuilt = GreatWondersBuilt,
 			};
 
@@ -452,6 +454,7 @@ namespace C7GameData.Save {
 		public List<SaveTerraform> TerraForms = new();
 		public List<Government> Governments = new();
 		public List<WorldSize> WorldSizes = new();
+		public Dictionary<string, List<HistTurnRecord>> History = new();
 
 		// The relative directory that can be used to find scenario-specific
 		// assets.

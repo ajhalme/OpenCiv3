@@ -20,12 +20,18 @@ public class CulturalVictory : IVictory {
 			.OrderByDescending(c => c.Culture)
 			.ToList();
 
-		var totalCulture = citiesByCulture.Sum(c => c.Culture);
 		var topCityCulture = citiesByCulture.FirstOrDefault();
+
+		// Not the same as total civ culture: ignores culture gained from lost cities
+		// var totalCityCulture = citiesByCulture.Sum(c => c.Culture);
+
+		var history = gameData.history[player.id.ToString()];
+		var lastTurn = history.LastOrDefault();
+		var totalAccumulatedCulture = lastTurn?.Culture ?? 0;
 
 		return new VictoryStatus {
 			Player = player,
-			TotalCulture = totalCulture,
+			TotalCulture = totalAccumulatedCulture,
 			TopCityCulture = topCityCulture?.Culture ?? 0,
 			TopCityName = topCityCulture?.Name ?? "None"
 		};

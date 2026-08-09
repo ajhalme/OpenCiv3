@@ -12,4 +12,5 @@ public class VictoryStatus {
 	public string TopCityName { get; set; }
 	public bool OwnsUnitedNations { get; set; }
 	public float TurnScore { get; set; }
+	public float Score { get; set; }
 }
