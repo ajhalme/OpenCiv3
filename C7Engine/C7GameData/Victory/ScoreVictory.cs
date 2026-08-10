@@ -38,9 +38,9 @@ public class ScoreVictory : IVictory {
 		var topRivalScore = topRivalByScore == null ? "" : $"{topRivalByScore.TurnScore}";
 
 		return [
-			"Turn score",
 			"",
-			"Current turn:",
+			"",
+			"Turn Score:",
 			$"{status.TurnScore}",
 			topRival,
 			topRivalScore
