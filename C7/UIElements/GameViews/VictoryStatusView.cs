@@ -19,8 +19,6 @@ public partial class VictoryStatusView : Control {
 	private const int GridHeaderColumns = 3;
 	private const int GridColumns = 6;
 
-	private List<IVictory> _victoryConditions;
-
 	public VictoryStatusView() {
 		MouseFilter = MouseFilterEnum.Stop;
 	}
@@ -59,10 +57,6 @@ public partial class VictoryStatusView : Control {
 	private void DrawGrid(GameData gameData) {
 		ClearGrid();
 
-		if (_victoryConditions == null) {
-			RegisterVictoryConditions(gameData);
-		}
-
 		Player player = gameData.GetFirstHumanPlayer();
 		List<Player> rivals = gameData.GetKnownRivals(player);
 
@@ -70,48 +64,9 @@ public partial class VictoryStatusView : Control {
 
 		AddTitleRow("To Win", player.civilization.name, "Top Rival");
 
-		foreach (IVictory vc in _victoryConditions!) {
+		foreach (IVictory vc in gameData.victories) {
 			ProcessVictoryCondition(vc, gameData, player, rivals);
 		}
-	}
-
-	private void RegisterVictoryConditions(GameData gameData) { // TODO: push into gameData
-		_victoryConditions = [];
-
-		VictoryConditions conditions = gameData.victoryConditions;
-
-		if (conditions.AllowDominationVictory) {
-			var dominationAreaLimit = 66f; // TODO: ruleset, dom area victory condition
-			var dominationPopulationLimit = 66f; // TODO: ruleset, dom pop victory condition
-			_victoryConditions.Add(new DominationVictory(dominationAreaLimit, dominationPopulationLimit));
-		}
-
-		if (conditions.AllowCulturalVictory) {
-			var totalCultureLimit = 100000; // TODO: ruleset, total culture victory condition
-			var topCityCultureLimit = 20000; // TODO: ruleset, one city culture victory condition
-			_victoryConditions.Add(new CulturalVictory(totalCultureLimit, topCityCultureLimit));
-		}
-
-		// Always render score (not a victory condition in itself)
-		_victoryConditions.Add(new ScoreVictory());
-
-		if (conditions.AllowSpaceRaceVictory) {
-			var partsToBuild = 10; // TODO: ruleset, space race victory condition
-			_victoryConditions.Add(new SpaceRaceVictory(partsToBuild));
-		}
-
-		if (conditions.AllowDiplomaticVictory) {
-			_victoryConditions.Add(new DiplomaticVictory());
-		}
-
-		if (conditions.AllowConquestVictory) {
-			// TODO: ruleset, Conquest victory condition
-			_victoryConditions.Add(new ConquestVictory(rivalsAliveLimit: 0));
-		}
-
-		// TODO: Does the original have a switch to have the game never end?
-		// Always add time limits
-		_victoryConditions.Add(new TimeLimitVictory(gameData.timeOptions.turnLimit));
 	}
 
 	private void ProcessVictoryCondition(IVictory dv, GameData gameData, Player player, List<Player> rivals) {

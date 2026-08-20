@@ -1148,7 +1148,7 @@ namespace C7GameData {
 			// Here we calculate the cumulative moving average: S[n+1] = S[n] + (x[n+1] - S[N])/(n+1)
 			int lastScore = (lastTurn?.Score ?? 0);
 			float turnScore = ScoreVictory.ComputeTurnScore(this, gameData);
-			int score = (int) Math.Floor(lastScore + (turnScore - lastScore) / (1f * n));
+			int score = (int) Math.Floor(lastScore + (turnScore - lastScore) / (1f * (n+1)));
 
 			// Culture is "the sum of the cultural value of all your cities"
 			int totalCulture = cities.Sum(c => c.GetCulture());
