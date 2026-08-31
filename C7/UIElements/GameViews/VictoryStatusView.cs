@@ -88,6 +88,8 @@ public partial class VictoryStatusView : Control {
 			child.QueueFree();
 	}
 
+	// TODO: Make more use of Godot UI instead of character-base dynamic hackery
+
 	private const string HeaderPadding = "     ";
 	private const string Padding = "      ";
 

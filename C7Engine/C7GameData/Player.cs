@@ -1138,6 +1138,8 @@ namespace C7GameData {
 			int n = gameData.history[id.ToString()].Count;
 			HistTurnRecord lastTurn = gameData.history[id.ToString()].LastOrDefault();
 
+			// TODO: Make formulas moddable
+
 			// "Power is an amalgam of cities, gold, culture, advances, resources, military strength,
 			// nuclear weapons, and wonder."
 			// Exact formula is unknown, so we repeat the previous value.

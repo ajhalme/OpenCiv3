@@ -959,6 +959,7 @@ namespace C7GameData {
 			}
 		}
 
+		// TODO: Confirm IsDefeated logic
 		private static bool IsDefeated(SavePlayer player, QueryCiv3.Sav.LEAD leader) {
 			if (player.isBarbarian)
 				return false;

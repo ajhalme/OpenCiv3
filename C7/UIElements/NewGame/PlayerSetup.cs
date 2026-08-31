@@ -115,9 +115,6 @@ public partial class PlayerSetup : Control {
 		dominationVictory.Toggled += (state) => { victoryConditions.AllowDominationVictory = state; };
 		rulesContainer.AddChild(dominationVictory);
 
-		var placeholder1 = new Civ3Checkbox() { Text = "Placeholder" };
-		rulesContainer.AddChild(placeholder1);
-
 		var conquestVictory = new Civ3Checkbox() { Text = "Allow Conquest Victory" };
 		conquestVictory.SetPressed(victoryConditions.AllowConquestVictory);
 		conquestVictory.Toggled += (state) => { victoryConditions.AllowConquestVictory = state; };
