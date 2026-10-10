@@ -7,6 +7,10 @@ public class VictoryStatus {
 	public int RivalsAlive { get; set; }
 	public float DominationArea { get; set; }
 	public float DominationPopulation { get; set; }
+	public int TotalCulture { get; set; }
+	public int TopCityCulture { get; set; }
+	public string TopCityName { get; set; }
+	public bool OwnsUnitedNations { get; set; }
 	public float TurnScore { get; set; }
 	public float Score { get; set; }
 }

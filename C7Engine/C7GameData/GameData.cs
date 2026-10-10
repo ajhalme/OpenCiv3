@@ -52,9 +52,6 @@ namespace C7GameData {
 		public Dictionary<string, List<HistTurnRecord>> history;
 		public VictoryConditions victoryConditions;
 		public List<IVictory> victories = new();
-
-		public VictoryConditions victoryConditions;
-		public List<IVictory> victories = new();
 		public bool gameOver;
 		public Player winner;
 		// TODO: Victory type serialization
