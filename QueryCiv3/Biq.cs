@@ -62,29 +62,31 @@ namespace QueryCiv3 {
 		// Dynamic sections need to have their static subcomponents read in as discrete chunks, which these length constants help with
 		// The sum of the LEN constants for each section equals the total size of that section's struct
 		// eg. GOVT_LEN_1 + GOVT_LEN_2 == sizeof(GOVT)
-		private const int GOVT_LEN_1 =  400;
-		private const int GOVT_LEN_2 =   76;
-		private const int TERR_LEN_1 =    8;
-		private const int TERR_LEN_2 =  225;
-		private const int RACE_LEN_1 =    8;
-		private const int RACE_LEN_2 =    4;
-		private const int RACE_LEN_3 =  208;
-		private const int RACE_LEN_4 =   92;
-		private const int CITY_LEN_1 =   38;
-		private const int CITY_LEN_2 =   36;
-		private const int WMAP_LEN_1 =    8;
-		private const int WMAP_LEN_2 =  164;
-		private const int PRTO_LEN_1 =  238;
-		private const int PRTO_LEN_2 =   21;
-		private const int LEAD_LEN_1 =   56;
-		private const int LEAD_LEN_2 =    8;
-		private const int LEAD_LEN_3 =   33;
-		private const int RULE_LEN_1 =  104;
-		private const int RULE_LEN_2 =  164;
-		private const int RULE_LEN_3 =   32;
-		private const int GAME_LEN_1 =   16;
-		private const int GAME_LEN_2 = 5304;
-		private const int GAME_LEN_3 = 2017;
+		// This invariant is enforced by the BiqSectionSizeTests test in EngineTests; a mismatch means a
+		// section's Buffer.MemoryCopy writes past the end of its struct's backing memory.
+		internal const int GOVT_LEN_1 =  400;
+		internal const int GOVT_LEN_2 =   76;
+		internal const int TERR_LEN_1 =    8;
+		internal const int TERR_LEN_2 =  225;
+		internal const int RACE_LEN_1 =    8;
+		internal const int RACE_LEN_2 =    4;
+		internal const int RACE_LEN_3 =  208;
+		internal const int RACE_LEN_4 =   92;
+		internal const int CITY_LEN_1 =   38;
+		internal const int CITY_LEN_2 =   32;
+		internal const int WMAP_LEN_1 =    8;
+		internal const int WMAP_LEN_2 =  164;
+		internal const int PRTO_LEN_1 =  238;
+		internal const int PRTO_LEN_2 =   21;
+		internal const int LEAD_LEN_1 =   56;
+		internal const int LEAD_LEN_2 =    8;
+		internal const int LEAD_LEN_3 =   33;
+		internal const int RULE_LEN_1 =  104;
+		internal const int RULE_LEN_2 =  164;
+		internal const int RULE_LEN_3 =   32;
+		internal const int GAME_LEN_1 =   16;
+		internal const int GAME_LEN_2 = 5304;
+		internal const int GAME_LEN_3 = 2017;
 
 		public string Title;
 		public string Description;

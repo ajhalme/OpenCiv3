@@ -53,7 +53,7 @@ namespace C7GameData {
 		public void computeNeighbors() {
 			foreach (Tile tile in tiles) {
 				Dictionary<TileDirection, Tile> neighbors = new Dictionary<TileDirection, Tile>();
-				foreach (TileDirection direction in Enum.GetValues(typeof(TileDirection))) {
+				foreach (TileDirection direction in TileDirectionExtensions.All) {
 					neighbors[direction] = tileNeighbor(tile, direction);
 				}
 				tile.neighbors = neighbors;

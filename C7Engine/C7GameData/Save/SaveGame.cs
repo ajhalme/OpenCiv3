@@ -82,6 +82,8 @@ namespace C7GameData.Save {
 				TimeOptions = data.timeOptions,
 				History = data.history,
 				VictoryConditions = data.victoryConditions,
+				GameOver = data.gameOver,
+				Winner = data.winner != null ? new SavePlayer(data.winner) : null,
 				TerrainImprovements = data.terrainImprovements.ConvertAll(ti => ti.ToSaveTerrainImprovement()),
 				GameModeConfig = data.gameModeConfig,
 			};
@@ -139,7 +141,12 @@ namespace C7GameData.Save {
 			ConvertCultureGroups(data);
 			ConvertAlliances(data);
 			ConvertAllianceWars(data);
+
 			ConvertVictoryConditions(data);
+
+			// TODO: Redo victory state recording
+			data.winner = data.players?.FirstOrDefault(p => p.civilization?.name == Winner?.civilization);
+			data.gameOver = GameOver;
 
 			BeginHistory(data);
 
@@ -166,37 +173,15 @@ namespace C7GameData.Save {
 		private void ConvertVictoryConditions(GameData data) {
 			VictoryConditions conditions = data.victoryConditions;
 
-			if (conditions.AllowDominationVictory) {
-				var dominationAreaLimit = 66f; // TODO: ruleset, dom area victory condition
-				var dominationPopulationLimit = 66f; // TODO: ruleset, dom pop victory condition
-				data.victories.Add(new DominationVictory(dominationAreaLimit, dominationPopulationLimit));
-			}
+			// TODO: add victory options to data.victories based on data.victoryConditions
+			// NOTE: Order matters
 
-			if (conditions.AllowCulturalVictory) {
-				var totalCultureLimit = 100000; // TODO: ruleset, total culture victory condition
-				var topCityCultureLimit = 20000; // TODO: ruleset, one city culture victory condition
-				data.victories.Add(new CulturalVictory(totalCultureLimit, topCityCultureLimit));
-			}
-
-			// Always render score (not a victory condition in itself)
+			// There is no "score victory", but we can treat score as if it were, so
+			// we can render the current score alongside the state of other conditions
 			data.victories.Add(new ScoreVictory());
 
-			// if (conditions.AllowSpaceRaceVictory) { // TODO: implement space race victory
-			// 	var partsToBuild = 10; // TODO: ruleset, space race victory condition
-			// 	data.victories.Add(new SpaceRaceVictory(partsToBuild));
-			// }
-			//
-			// if (conditions.AllowDiplomaticVictory) { // TODO: implement diplomatic victory
-			// 	data.victories.Add(new DiplomaticVictory());
-			// }
-			//
-			// if (conditions.AllowConquestVictory) { // TODO: implement conquest victory
-			// 	// TODO: ruleset, Conquest victory condition
-			// 	data.victories.Add(new ConquestVictory(rivalsAliveLimit: 0));
-			// }
-
 			// TODO: Does the original have a switch to have the game never end?
-			// Always add time limits
+			// Always add a time limit
 			data.victories.Add(new TimeLimitVictory(data.timeOptions.turnLimit));
 		}
 
@@ -498,6 +483,8 @@ namespace C7GameData.Save {
 		public Rules Rules = new();
 		public TimeOptions TimeOptions = new();
 		public VictoryConditions VictoryConditions = new();
+		public bool GameOver { get; set; }
+		public SavePlayer Winner { get; set; }
 		public List<SaveTech> Techs = new();
 		public List<CitizenType> CitizenTypes = new();
 		public List<SaveTerraform> TerraForms = new();

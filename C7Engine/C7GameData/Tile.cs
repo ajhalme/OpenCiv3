@@ -238,7 +238,7 @@ namespace C7GameData {
 				case TileDirection.SOUTHWEST: return riverSouthwest;
 				case TileDirection.WEST: return riverWest;
 				case TileDirection.NORTHWEST: return riverNorthwest;
-				default: throw new ArgumentOutOfRangeException("Invalid TileDirection");
+				default: return false;
 			}
 		}
 

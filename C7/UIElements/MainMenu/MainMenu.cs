@@ -17,9 +17,10 @@ public partial class MainMenu : Node {
 	[Export]
 	MenuButtonContainer ButtonContainer;
 	[Export]
-	AudioStreamPlayer player;
+	Preferences preferences;
 
 	GlobalSingleton Global;
+	AudioManager AudioManager;
 
 	public override void _Ready() {
 		log = LogManager.ForContext<MainMenu>();
@@ -29,6 +30,9 @@ public partial class MainMenu : Node {
 
 		try {
 			DisplayTitleScreen();
+
+			AudioManager = GetNode<AudioManager>("/root/GlobalAudioManager");
+			PlayMusic();
 		} catch (Exception ex) {
 			log.Error(ex, "Could not set up the main menu");
 		}
@@ -61,9 +65,8 @@ public partial class MainMenu : Node {
 		ButtonContainer.LoadScenario.Pressed += LoadScenario;
 		ButtonContainer.HallOfFame.Pressed += HallOfFame;
 		ButtonContainer.HallOfFame.Visible = false;
-		ButtonContainer.Preferences.Pressed += Preferences;
-		ButtonContainer.Preferences.Visible = false;
-		ButtonContainer.AudioPreferences.Pressed += Preferences;
+		ButtonContainer.Preferences.Pressed += ShowPreferences;
+		ButtonContainer.AudioPreferences.Pressed += ShowPreferences;
 		ButtonContainer.AudioPreferences.Visible = false;
 		ButtonContainer.Credits.Pressed += showCredits;
 		ButtonContainer.Exit.Pressed += _on_Exit_pressed;
@@ -101,9 +104,9 @@ public partial class MainMenu : Node {
 
 	private void SetToggleGraphicsText() {
 		if (C7Settings.UseStandaloneMode()) {
-			ButtonContainer.ToggleGraphics.Text = "Import Civilization III Graphics";
+			ButtonContainer.ToggleGraphics.Text = "Use Civilization III Media";
 		} else {
-			ButtonContainer.ToggleGraphics.Text = "Use OpenCiv3 Graphics";
+			ButtonContainer.ToggleGraphics.Text = "Use OpenCiv3 Media";
 		}
 	}
 
@@ -140,22 +143,13 @@ public partial class MainMenu : Node {
 		PlayButtonPressedSound();
 	}
 
-	public void Preferences() {
+	public void ShowPreferences() {
 		PlayButtonPressedSound();
+		preferences.ShowPreferences();
 	}
 
 	public void _on_Exit_pressed() {
 		GetTree().Quit(); // no need to notify the scene tree
-	}
-
-	private void PlayButtonPressedSound() {
-		AudioStream stream = AudioLoader.Load("buttons.button_1");
-
-		if (stream == null)
-			return;
-
-		player.Stream = stream;
-		player.Play();
 	}
 
 	private void _on_SetCiv3Home_pressed() {
@@ -173,5 +167,13 @@ public partial class MainMenu : Node {
 	private void UseStandaloneModePressed() {
 		Global.ActivateGameMode(GamePaths.standalone);
 		DisplayTitleScreen();
+	}
+
+	private void PlayMusic() {
+		AudioManager.PlayMusic("menu.main_menu_1");
+	}
+
+	private void PlayButtonPressedSound() {
+		AudioManager.PlayUIAudio("buttons.button_1");
 	}
 }

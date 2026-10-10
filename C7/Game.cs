@@ -114,6 +114,8 @@ public partial class Game : Node {
 	private GameViews gameViews;
 	[Export]
 	private Diplomacy diplomacy;
+	[Export]
+	private Preferences preferences;
 
 	[Export]
 	private DoubleClickHandler doubleClickHandler;
@@ -205,6 +207,13 @@ public partial class Game : Node {
 		}
 
 		InitializeMapView();
+		InitializeAudio();
+	}
+
+	private void InitializeAudio() {
+		AudioManager audio = GetNode<AudioManager>("/root/GlobalAudioManager");
+		audio.StopMusic();
+		// TODO: switch to in-game playlist / music logic
 	}
 
 	private async Task StartGame() {
@@ -321,9 +330,7 @@ public partial class Game : Node {
 				break;
 			case MsgCivilizationDestroyed mCivD:
 				popupOverlay.ShowPopup(new CivilizationDestroyed(mCivD.civilization), PopupOverlay.PopupCategory.Advisor);
-
-				// Break out of fast forward mode after interesting events.
-				turnsLeftToFastForward = 0;
+				InterestingEvent();
 				break;
 			case MsgShowMilitaryAdvisorPopup mSMAP:
 				if (!popupOverlay.Visible) {
@@ -380,10 +387,7 @@ public partial class Game : Node {
 				popupOverlay.ShowPopup(
 					new InformationalPopup($"The {mWD.aggressor.civilization.noun} declared war on the {mWD.opponent.civilization.noun}"),
 					PopupOverlay.PopupCategory.Advisor);
-
-				// Break out of the fast forward mode when something
-				// interesting happens.
-				turnsLeftToFastForward = 0;
+				InterestingEvent();
 				break;
 			case MsgShowTemporaryPopup mSTP:
 				Vector2 pos = mapView.screenLocationOfTile(mSTP.location, true);
@@ -407,7 +411,29 @@ public partial class Game : Node {
 						}),
 					PopupOverlay.PopupCategory.Advisor);
 				break;
+			case MsgVictory mV:
+				var endMsg =
+					$"The {mV.winner.civilization.noun} have won a {mV.victory.Header()} victory!\n"
+					+ "This game is over: No further score will be entered.\n\n";
+
+				popupOverlay.ShowPopup(
+					new ConfirmationPopup(
+						endMsg,
+						"Good! I’m Done!",
+						"Wait, lemme just play a couple of more turns...",
+						() => {
+							OnRetire();
+						}),
+					PopupOverlay.PopupCategory.Advisor);
+
+				InterestingEvent();
+				break;
 		}
+	}
+
+	private void InterestingEvent() {
+		// Break out of fast forward mode after interesting events.
+		turnsLeftToFastForward = 0;
 	}
 
 	public override void _Process(double delta) {
@@ -555,6 +581,15 @@ public partial class Game : Node {
 
 		// TODO: sound -- see MainMenu.PlayButtonPressedSound();
 		FileDialog.Popup();
+	}
+
+	public void OnOpenPreferences() {
+		popupOverlay.OnHidePopup();
+		if (preferences.Visible) {
+			preferences.HidePreferences();
+		} else {
+			preferences.ShowPreferences();
+		}
 	}
 
 	public void OnResolved() {
@@ -793,6 +828,15 @@ public partial class Game : Node {
 			ToggleObserverMode();
 		}
 
+		if (eventKeyDown.Keycode == Godot.Key.P && eventKeyDown.IsCommandOrControlPressed()) {
+			if (preferences.Visible) {
+				preferences.HidePreferences();
+			} else {
+				preferences.ShowPreferences();
+			}
+			return;
+		}
+
 		if (eventKeyDown.Keycode == Godot.Key.F1) {
 			EmitSignal(SignalName.ShowSpecificAdvisor, C7Action.ShowDomesticAdvisor);
 		}
@@ -931,7 +975,7 @@ public partial class Game : Node {
 		if (popupOverlay.Visible || cityScreen.Visible || diplomacy.Visible)
 			return true;
 
-		if (advisor.Visible || gameViews.Visible)
+		if (advisor.Visible || gameViews.Visible || preferences.Visible)
 			return true;
 
 		return false;
@@ -963,6 +1007,20 @@ public partial class Game : Node {
 
 		if (currentAction == C7Action.Escape && advisor.Visible) {
 			advisor.Hide();
+			return;
+		}
+
+		if (currentAction == C7Action.OpenPreferences) {
+			if (preferences.Visible) {
+				preferences.HidePreferences();
+			} else {
+				preferences.ShowPreferences();
+			}
+			return;
+		}
+
+		if (currentAction == C7Action.Escape && preferences.Visible) {
+			preferences.HidePreferences();
 			return;
 		}
 

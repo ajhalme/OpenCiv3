@@ -53,6 +53,12 @@ namespace C7GameData {
 		public VictoryConditions victoryConditions;
 		public List<IVictory> victories = new();
 
+		public VictoryConditions victoryConditions;
+		public List<IVictory> victories = new();
+		public bool gameOver;
+		public Player winner;
+		// TODO: Victory type serialization
+
 		public BarbarianInfo barbarianInfo = new BarbarianInfo();
 
 		public StrengthBonus fortificationBonus;

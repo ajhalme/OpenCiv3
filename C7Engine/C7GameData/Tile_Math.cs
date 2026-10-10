@@ -255,9 +255,23 @@ public enum TileDirection {
 	SOUTHWEST,
 	WEST,
 	NORTHWEST,
+	INVALID,
 }
 
 public static class TileDirectionExtensions {
+	// The 8 real directions, e.g. for iterating neighbors. Do NOT iterate
+	// Enum.GetValues(typeof(TileDirection)) here: it also returns INVALID.
+	public static readonly TileDirection[] All = new TileDirection[] {
+		TileDirection.NORTH,
+		TileDirection.NORTHEAST,
+		TileDirection.EAST,
+		TileDirection.SOUTHEAST,
+		TileDirection.SOUTH,
+		TileDirection.SOUTHWEST,
+		TileDirection.WEST,
+		TileDirection.NORTHWEST,
+	};
+
 	public static TileDirection Reversed(this TileDirection dir) {
 		switch (dir) {
 			case TileDirection.NORTH: return TileDirection.SOUTH;
@@ -268,7 +282,7 @@ public static class TileDirectionExtensions {
 			case TileDirection.SOUTHWEST: return TileDirection.NORTHEAST;
 			case TileDirection.WEST: return TileDirection.EAST;
 			case TileDirection.NORTHWEST: return TileDirection.SOUTHEAST;
-			default: throw new ArgumentOutOfRangeException("Invalid TileDirection");
+			default: return TileDirection.INVALID;
 		}
 	}
 
@@ -282,7 +296,7 @@ public static class TileDirectionExtensions {
 			case TileDirection.SOUTHWEST: return TileDirection.SOUTHEAST;
 			case TileDirection.WEST: return TileDirection.SOUTH;
 			case TileDirection.NORTHWEST: return TileDirection.SOUTHWEST;
-			default: throw new ArgumentOutOfRangeException("Invalid TileDirection");
+			default: return TileDirection.INVALID;
 		}
 	}
 
@@ -296,7 +310,7 @@ public static class TileDirectionExtensions {
 			case TileDirection.SOUTHWEST: return (-1, 1);
 			case TileDirection.WEST: return (-2, 0);
 			case TileDirection.NORTHWEST: return (-1, -1);
-			default: throw new ArgumentOutOfRangeException("Invalid TileDirection");
+			default: return (0, 0);
 		}
 	}
 }
